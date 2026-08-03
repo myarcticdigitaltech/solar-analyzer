@@ -287,7 +287,7 @@ function loadDemo(){
 function showEmpty(){ if($("columnWarning")) $("columnWarning").style.display="none"; $("emptyState").style.display="flex"; $("loadingState").style.display="none"; $("dashboardContent").classList.remove("visible"); $("headerActions").style.display="none"; $("initialSubtitle").style.display="block"; $("resultSubtitle").style.display="none"; }
 function showLoading(){ $("emptyState").style.display="none"; $("loadingState").style.display="flex"; $("dashboardContent").classList.remove("visible"); $("headerActions").style.display="none"; }
 function showDashboard(){ $("emptyState").style.display="none"; $("loadingState").style.display="none"; $("dashboardContent").classList.add("visible"); $("headerActions").style.display="flex"; $("initialSubtitle").style.display="none"; $("resultSubtitle").style.display="block"; }
-const API_URL = "https://solar-analyzer-aoy4.onrender.com";
+const API_URL = "https://solar-analyzer-api.onrender.com";
 function getSiteMetadata(){
   const siteName=$("siteName").value.trim();
   const installedSize=Number($("installedSize").value);
