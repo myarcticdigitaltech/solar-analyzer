@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solar CSV / Excel Analyzer</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --navy:#0e2f4d;--blue:#0b4bb3;--green:#14966f;--green2:#eaf8f3;
+  --orange:#f27921;--orange2:#fff5eb;--red:#ef4a4a;--sky:#eef5ff;
+  --text:#183249;--muted:#6d8091;--line:#dbe6ef;--bg:#f4f7fb;--white:#fff;
+  --shadow:0 8px 26px rgba(19,50,75,.08);--radius:17px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,"Noto Sans Thai",Tahoma,sans-serif;background:var(--bg);color:var(--text)}
+.app{display:grid;grid-template-columns:118px 1fr;min-height:100vh}
+.sidebar{background:linear-gradient(180deg,#0b3458,#07243d);color:#fff;padding:28px 18px;display:flex;flex-direction:column;align-items:center}
+.brand{display:flex;flex-direction:column;align-items:center;gap:10px;font-size:0;font-weight:700;margin-bottom:26px}
+.brand-icon{width:68px;height:68px;border-radius:20px;background:#ffffff14;display:grid;place-items:center;font-size:38px}
+.nav a{width:58px;height:58px;display:grid;place-items:center;color:#dce8f1;text-decoration:none;border-radius:18px;margin:7px 0;font-size:0}
+.nav a.active{background:#14b18a;color:#fff}
+.side-note{display:none}
+main{padding:34px 36px 44px;overflow-x:auto}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+h1{font-size:42px;line-height:1.18;letter-spacing:-.6px;margin:0 0 12px}.site{color:var(--green);font-weight:800}.sub{color:var(--muted);font-size:21px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+button,.file-label,select,input{font:inherit}
+button,.file-label{border:1px solid var(--line);background:#fff;color:var(--text);padding:18px 24px;border-radius:18px;cursor:pointer;font-size:18px;font-weight:700;box-shadow:0 8px 24px rgba(18,46,70,.08)}
+button.primary,.file-label.primary{background:var(--green);border-color:var(--green);color:#fff}
+input[type=file]{display:none}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+
+
+
+
+
+
+.grid{display:grid;gap:15px}
+.summary{grid-template-columns:repeat(3,1fr);margin-top:26px;gap:22px}
+.metric{padding:30px 27px;display:flex;align-items:center;gap:23px;min-height:210px}
+.circle{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:44px;flex:0 0 auto}
+.c-blue{background:linear-gradient(145deg,#2465ba,#0f408e)}.c-green{background:linear-gradient(145deg,#4caf5b,#1e7e3a)}.c-teal{background:linear-gradient(145deg,#19b08b,#0a7d62)}
+.metric-label{font-size:21px;line-height:1.3}.metric-value{font-size:54px;font-weight:800;line-height:1;margin-top:9px}.unit{font-size:18px;color:var(--muted);margin-top:8px}
+.section-title{font-size:25px;margin:34px 0 16px;font-weight:800}
+.times{grid-template-columns:repeat(3,1fr)}
+.time-card{padding:17px;display:flex;gap:13px;align-items:center;border-radius:15px}
+.time-card b{display:block;font-size:17px;margin-bottom:4px}.t-green{background:var(--green2);border:1px solid #bee5d7}.t-orange{background:var(--orange2);border:1px solid #ffd2ad}.t-blue{background:var(--sky);border:1px solid #c7dafc}
+.panel{padding:17px;margin-top:17px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:13px}.panel-head h2{font-size:18px;margin:0}.pill{background:#eef3f7;padding:6px 10px;border-radius:999px;color:#5d7284;font-size:12px}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:13px}
+table{width:100%;min-width:1050px;border-collapse:collapse;font-size:12px}
+th,td{padding:9px 8px;text-align:center;border-right:1px solid var(--line);border-bottom:1px solid var(--line);white-space:nowrap}
+thead tr:first-child th{background:#0c4eaf;color:#fff}thead tr:nth-child(2) th{background:#eaf2fd;color:#214763}
+tbody tr:nth-child(even){background:#fbfdff}tbody tr.average{background:#edf4ff;font-weight:800}
+.pos{color:#12925f;font-weight:800}.neg{color:var(--red);font-weight:800}.warn{color:var(--orange);font-weight:800}
+.analysis{grid-template-columns:repeat(3,1fr);margin-top:15px}
+.analysis .card{padding:17px}.analysis h3{margin:0 0 10px;font-size:16px}.analysis ul{padding-left:18px;margin:0;line-height:1.7;font-size:13px}.highlight{margin-top:12px;padding:10px 11px;border-radius:10px;font-size:13px;font-weight:800}.hg{background:#eaf8f2;color:#0a7b59}.ho{background:#fff4e8;color:#d86715}.hb{background:#edf4ff;color:#245ca8}
+.recommend{grid-template-columns:repeat(3,1fr);margin-top:15px}.rec{padding:17px;min-height:145px}.rec .icon{font-size:30px}.rec h3{margin:8px 0;font-size:16px}.rec p{margin:0;color:var(--muted);font-size:13px;line-height:1.6}
+.bottom{grid-template-columns:1fr 1.35fr;margin-top:15px}.bottom .card{padding:19px}.panel-result{font-size:28px;color:#235fae;font-weight:800;margin:10px 0}.desc{font-size:13px;color:var(--muted);line-height:1.6}
+.rates{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:12px}.rate{text-align:center;background:#f7fafc;border:1px solid var(--line);border-radius:12px;padding:13px}.rate span{display:block;font-size:12px;color:var(--muted)}.rate b{display:block;font-size:20px;margin:5px 0}.note{margin-top:11px;background:#fff8e8;border:1px solid #efd88f;padding:11px;border-radius:10px;font-size:13px}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+
+.empty-state{min-height:calc(100vh - 150px);display:flex;align-items:center;justify-content:center;padding:36px 0}.empty-card{width:min(820px,100%);padding:48px 34px;text-align:center}.empty-icon{width:96px;height:96px;margin:0 auto 20px;border-radius:28px;display:grid;place-items:center;font-size:48px;background:linear-gradient(145deg,#eaf8f3,#eef5ff);border:1px solid var(--line)}.empty-card h2{margin:0 0 10px;font-size:30px}.empty-card p{margin:0 auto 24px;max-width:620px;color:var(--muted);line-height:1.7}.drop-zone{border:2px dashed #b8ccdc;border-radius:20px;padding:34px 22px;background:#fbfdff;transition:.2s}.drop-zone.dragover{border-color:var(--green);background:#effaf6}.drop-zone small{display:block;margin-top:13px;color:var(--muted)}.loading-state{min-height:calc(100vh - 150px);display:none;align-items:center;justify-content:center}.loading-card{width:min(520px,100%);padding:40px;text-align:center}.spinner{width:54px;height:54px;margin:0 auto 18px;border:5px solid #dfeae6;border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.dashboard-content{display:none}.dashboard-content.visible{display:block}
+@media(max-width:1050px){.app{grid-template-columns:86px 1fr}.summary,.times,.analysis,.recommend,.bottom{grid-template-columns:1fr}.metric{min-height:auto}}
+@media(max-width:700px){.app{display:block}.sidebar{display:none}main{padding:14px}.topbar{flex-direction:column}.actions{justify-content:flex-start}.summary{grid-template-columns:1fr}h1{font-size:23px}}
+</style>
+
+<style>
+html,body{width:100%;min-height:100%}
+body{overflow-x:hidden}
+.app{grid-template-columns:240px minmax(0,1fr)}
+.sidebar{padding:22px 18px;align-items:stretch}
+.brand{flex-direction:row;justify-content:flex-start;font-size:20px;margin-bottom:24px}
+.brand-icon{width:54px;height:54px;font-size:30px;flex:0 0 auto}
+.nav a{width:auto;height:auto;display:flex;justify-content:flex-start;gap:12px;padding:14px 16px;font-size:16px}
+.nav a b{font-size:18px}
+main{min-width:0;padding:28px 32px 48px;overflow-x:hidden}
+.topbar{width:100%;display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
+.topbar>div:first-child{min-width:0}
+h1{max-width:760px;font-size:38px}
+.sub{font-size:17px}
+.empty-state,.loading-state{width:100%;min-height:calc(100vh - 145px)}
+.empty-card{width:min(760px,100%);padding:44px}
+.dashboard-content{width:100%}
+.summary{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.metric{min-width:0;padding:24px;min-height:174px}
+.circle{width:72px;height:72px;font-size:34px}
+.metric-label{font-size:17px}
+.metric-value{font-size:44px}
+.unit{font-size:14px}
+.times,.analysis,.recommend{grid-template-columns:repeat(3,minmax(0,1fr))}
+.bottom{grid-template-columns:minmax(0,1fr) minmax(0,1.35fr)}
+.card{min-width:0}
+@media(max-width:1200px){
+  .app{grid-template-columns:92px minmax(0,1fr)}
+  .sidebar{align-items:center}
+  .brand{justify-content:center}
+  .brand span,.nav span{display:none}
+  .nav a{width:58px;height:58px;display:grid;place-items:center;padding:0}
+  .summary{grid-template-columns:1fr}
+  .times,.analysis,.recommend{grid-template-columns:1fr}
+  .bottom{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+  .app{display:block}
+  .sidebar{display:none}
+  main{padding:20px 16px 36px}
+  .topbar{flex-direction:column}
+  h1{font-size:29px}
+  .empty-card{padding:30px 18px}
+  .metric{padding:20px}
+}
+</style>
+
+<style>
+.nav a b{font-size:22px}
+@media(max-width:1050px){
+  .app{grid-template-columns:86px 1fr}
+  .summary,.times,.analysis,.recommend,.bottom{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+  h1{font-size:28px}
+}
+
+.site-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:20px 0 18px;text-align:left}
+.site-field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+.site-field input,.site-field select{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.site-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.meta-badge{background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-size:13px;color:#315d80}
+.day-note{color:#0b8a61;font-weight:700}.night-note{color:#245ca8;font-weight:700}
+@media(max-width:900px){.site-form{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.site-form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-icon">☀️</div><span>Solar<br>Analytics</span></div>
+  <nav class="nav">
+    <a class="active" href="#">▣ <span>Dashboard</span></a>
+        <a href="#table">▤ <span>Daily Analysis</span></a>
+    <a href="#recommend">✓ <span>Recommendation</span></a>
+  </nav>
+  <div class="side-note">🏠☀️<br><br>อัปโหลดไฟล์ครั้งเดียว<br>ระบบวิเคราะห์ให้อัตโนมัติ</div>
+</aside>
+
+<main>
+  <div class="topbar">
+    <div>
+      <h1>วิเคราะห์พฤติกรรมการใช้ไฟฟ้าในบ้าน</h1>
+      <div class="sub" id="initialSubtitle">อัปโหลด CSV หรือ Excel เพื่อเริ่มวิเคราะห์ข้อมูล</div>
+      <div class="sub" id="resultSubtitle" style="display:none">
+        <span class="site" id="siteLabel">UPLOADED SITE</span>
+        &nbsp;|&nbsp; <span id="dateRange"></span>
+      </div>
+      
+      <div class="site-meta" id="siteMeta" style="display:none">
+        <span class="meta-badge" id="sizeBadge">ขนาดติดตั้ง: - kWp</span>
+        <span class="meta-badge" id="batteryBadge">Battery: -</span>
+        <span class="meta-badge" id="panelBadge">จำนวนแผง: - แผง</span>
+      </div>
+      <div id="columnWarning" style="display:none;margin-top:10px;padding:10px 12px;border-radius:10px;background:#eef7ff;border:1px solid #c9def2;color:#315d80;font-size:13px;line-height:1.55"></div>
+    </div>
+    <div class="actions" id="headerActions" style="display:none">
+      <label class="file-label primary" for="fileInput">⇧ Upload CSV / Excel</label>
+    </div>
+  </div>
+
+  <input id="fileInput" type="file" accept=".csv,.xlsx,.xls">
+
+  <section class="empty-state" id="emptyState">
+    <div class="card empty-card">
+      <div class="empty-icon">📂</div>
+      <h2>อัปโหลดไฟล์เพื่อเริ่มวิเคราะห์</h2>
+      <p>ระบบจะอ่านข้อมูลรายชั่วโมง แบ่งช่วงเวลา 09:00–16:00, 16:00–22:00 และ 22:00–09:00 แล้ววิเคราะห์ผลตามสูตรที่กำหนดไว้ในเว็บ</p>
+      
+      <div class="site-form">
+        <div class="site-field"><label for="siteName">ชื่อ Site</label><input id="siteName" type="text" placeholder="เช่น Site 1312"></div>
+        <div class="site-field"><label for="installedSize">ขนาดติดตั้ง (kWp)</label><input id="installedSize" type="number" min="0" step="0.01" placeholder="เช่น 10.00"></div>
+        <div class="site-field"><label for="panelCountInput">จำนวนแผง</label><input id="panelCountInput" type="number" min="0" step="1" placeholder="เช่น 16"></div>
+      </div>
+      <div class="drop-zone" id="dropZone">
+        <div style="font-size:38px;margin-bottom:10px">⇧</div>
+        <b style="font-size:20px">ลากไฟล์มาวางที่นี่</b>
+        <div style="margin:14px 0;color:var(--muted)">หรือ</div>
+        <label class="file-label primary" for="fileInput">เลือกไฟล์ CSV / Excel</label>
+        <small>รองรับ .csv, .xlsx และ .xls</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="loading-state" id="loadingState">
+    <div class="card loading-card">
+      <div class="spinner"></div>
+      <h2>กำลังวิเคราะห์ข้อมูล</h2>
+      <p style="color:var(--muted)">กำลังแบ่งช่วงเวลาและคำนวณผลลัพธ์</p>
+    </div>
+  </section>
+
+  <div class="dashboard-content" id="dashboardContent">
+  <section class="grid summary">
+    <div class="card metric"><div class="circle c-blue">🏠</div><div><div class="metric-label">การใช้ไฟเฉลี่ย (ทั้งวัน)</div><div class="metric-value" id="avgUsage">53.16</div><div class="unit">kWh/วัน</div></div></div>
+    <div class="card metric"><div class="circle c-green">☀️</div><div><div class="metric-label">Solar ผลิตเฉลี่ย</div><div class="metric-value" style="color:#15885e" id="avgSolar">16.47</div><div class="unit">kWh/วัน</div></div></div>
+    <div class="card metric"><div class="circle c-teal">⚡</div><div><div class="metric-label">Solar ครอบคลุมการใช้ไฟกลางวัน</div><div class="metric-value" style="color:#087d5b" id="coverage">97%</div><div class="unit">09:00–16:00 น.</div></div></div>
+  </section>
+
+  <div class="section-title">ช่วงเวลาสำคัญของพฤติกรรมการใช้ไฟฟ้า</div>
+  <section class="grid times">
+    <div class="time-card t-green"><div style="font-size:31px">☀️</div><div><b>09:00–16:00 น.</b><span id="timeMsg1">ช่วง Solar ผลิตสูง ผลิตและใช้ไฟพร้อมกัน</span></div></div>
+    <div class="time-card t-orange"><div style="font-size:31px">🌇</div><div><b>16:00–22:00 น.</b><span id="timeMsg2">Solar ลดลง เริ่มพึ่งพา Grid มากขึ้น</span></div></div>
+    <div class="time-card t-blue"><div style="font-size:31px">🌙</div><div><b>22:00–09:00 น.</b><span id="timeMsg3">ตรวจสอบการใช้ไฟช่วงกลางคืน</span></div></div>
+  </section>
+
+  <section class="card panel" id="table">
+    <div class="panel-head"><h2>2. ข้อมูลรายวัน: เปรียบเทียบ Solar และการใช้ไฟ แบ่งตามช่วงเวลา</h2><span class="pill" id="dayCount">7 วัน</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th rowspan="2">วันที่</th><th colspan="4">Solar ผลิต (kWh)</th><th colspan="4">การใช้ไฟ (kWh)</th><th colspan="4">ส่วนต่าง (ผลิต–ใช้)</th><th rowspan="2">หมายเหตุกลางวัน</th><th rowspan="2">หมายเหตุกลางคืน</th></tr>
+          <tr><th>09–16</th><th>16–22</th><th>22–09</th><th>รวม</th><th>09–16</th><th>16–22</th><th>22–09</th><th>รวม</th><th>09–16</th><th>16–22</th><th>22–09</th><th>รวม</th></tr>
+        </thead>
+        <tbody id="dailyBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="section-title">3. พฤติกรรมการใช้ไฟฟ้าแบ่งตามช่วงเวลา</div>
+  <section class="grid analysis">
+    <div class="card"><h3 style="color:#0b8a61">☀️ 09:00–16:00 น.</h3><ul id="analysisDay"></ul><div class="highlight hg" id="dayHighlight"></div></div>
+    <div class="card"><h3 style="color:#e46d17">🌇 16:00–22:00 น.</h3><ul id="analysisEvening"></ul><div class="highlight ho" id="eveningHighlight"></div></div>
+    <div class="card"><h3 style="color:#245ca8">🌙 22:00–09:00 น.</h3><ul id="analysisNight"></ul><div class="highlight hb" id="nightHighlight"></div></div>
+  </section>
+
+  <div class="section-title" id="recommend">4. คำแนะนำที่ควรทำ</div>
+  <section class="grid recommend">
+    <div class="card rec"><div class="icon">🧺</div><h3>1) ย้ายโหลดหนักมาใช้กลางวัน</h3><p id="recLoad"></p></div>
+    <div class="card rec"><div class="icon">🔋</div><h3>2) พิจารณาเพิ่ม Battery</h3><p id="recBattery"></p></div>
+    <div class="card rec"><div class="icon">🔎</div><h3>3) ตรวจสอบการใช้ไฟกลางคืน</h3><p id="recNight"></p></div>
+  </section>
+
+  <section class="grid bottom">
+    <div class="card">
+      <h2 style="font-size:18px;margin:0">5. บ้านหลังนี้ควรเพิ่มแผงกี่แผง</h2>
+      <div class="panel-result" id="panelResult">แนะนำเพิ่มประมาณ 2 แผง</div>
+      <div class="desc" id="panelDesc"></div>
+    </div>
+    <div class="card">
+      <h2 style="font-size:18px;margin:0">6. มูลค่าไฟ</h2>
+      <div class="rates">
+        <div class="rate"><span>Peak</span><b>5.7982</b><small>บาท/หน่วย</small></div>
+        <div class="rate"><span>Off-Peak</span><b>2.6369</b><small>บาท/หน่วย</small></div>
+        <div class="rate"><span>Ft ปัจจุบัน</span><b>0.1623</b><small>บาท/หน่วย</small></div>
+        <div class="rate"><span>Tip</span><b>1 kWp</b><small>≈ 100 kWh/เดือน</small></div>
+      </div>
+      <div class="note" id="costNote"></div>
+    </div>
+  </section>
+</div></main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let rawRows = [], columns = [];
+
+const demoDaily = [
+ {date:"1 มิ.ย. 2026",s:[17.8,.3,0],u:[17,13,15.8]},
+ {date:"2 มิ.ย. 2026",s:[17.3,.3,0],u:[18,13,18.7]},
+ {date:"3 มิ.ย. 2026",s:[15.6,.3,0],u:[18,13,33]},
+ {date:"4 มิ.ย. 2026",s:[18.1,.3,0],u:[18.5,12.5,17.8]},
+ {date:"5 มิ.ย. 2026",s:[21.6,.4,0],u:[18,11,13.7]},
+ {date:"6 มิ.ย. 2026",s:[15.9,.3,0],u:[18,14,57.3]},
+ {date:"7 มิ.ย. 2026",s:[6.9,.2,0],u:[9,8,14.8]}
+];
+
+function n(v){ const x=parseFloat(String(v??"").replace(/,/g,"")); return Number.isFinite(x)?x:0 }
+function f(v){ return n(v).toFixed(2) }
+function avg(arr){ return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0 }
+function sum(arr){ return arr.reduce((a,b)=>a+b,0) }
+
+function loadDemo(){
+  $("siteLabel").textContent="SITE 1312";
+  $("dateRange").textContent="ข้อมูลตัวอย่าง 1–7 มิ.ย. 2026";
+  render(demoDaily);
+}
+
+function showEmpty(){ if($("columnWarning")) $("columnWarning").style.display="none"; $("emptyState").style.display="flex"; $("loadingState").style.display="none"; $("dashboardContent").classList.remove("visible"); $("headerActions").style.display="none"; $("initialSubtitle").style.display="block"; $("resultSubtitle").style.display="none"; }
+function showLoading(){ $("emptyState").style.display="none"; $("loadingState").style.display="flex"; $("dashboardContent").classList.remove("visible"); $("headerActions").style.display="none"; }
+function showDashboard(){ $("emptyState").style.display="none"; $("loadingState").style.display="none"; $("dashboardContent").classList.add("visible"); $("headerActions").style.display="flex"; $("initialSubtitle").style.display="none"; $("resultSubtitle").style.display="block"; }
+const API_URL = window.SOLAR_API_URL || "http://127.0.0.1:8000";
+function getSiteMetadata(){
+  const siteName=$("siteName").value.trim();
+  const installedSize=Number($("installedSize").value);
+  const panelCount=Number($("panelCountInput").value);
+  if(!siteName) throw new Error("กรุณากรอกชื่อ Site");
+  if(!Number.isFinite(installedSize)||installedSize<=0) throw new Error("กรุณากรอกขนาดติดตั้ง");
+  if(!Number.isFinite(panelCount)||panelCount<0) throw new Error("กรุณากรอกจำนวนแผง");
+  return {siteName,installedSize,panelCount};
+}
+
+async function handleFile(file){
+  if(!file) return;
+
+  showLoading();
+
+  try{
+    const metadata=getSiteMetadata();
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("site_name", metadata.siteName);
+    formData.append("installed_size_kwp", String(metadata.installedSize));
+    formData.append("panel_count", String(metadata.panelCount));
+
+    const response = await fetch(`${API_URL}/api/analyze`, {
+      method: "POST",
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if(!response.ok){
+      throw new Error(result.detail || result.message || "Backend วิเคราะห์ไฟล์ไม่สำเร็จ");
+    }
+
+    if(result.status !== "completed"){
+      throw new Error("Backend ยังวิเคราะห์ข้อมูลไม่เสร็จ");
+    }
+
+    renderBackendResult(result, file.name, metadata);
+    showDashboard();
+
+  }catch(err){
+    showEmpty();
+    alert("ไม่สามารถวิเคราะห์ไฟล์ได้\n\n" + err.message);
+  }finally{
+    $("fileInput").value = "";
+  }
+}
+
+$("fileInput").addEventListener("change",e=>handleFile(e.target.files[0]));
+
+function detectColumns(cols){
+  const find = keywords => cols.find(col => {
+    const normalized = String(col).toLowerCase().replace(/\s+/g," ");
+    return keywords.some(keyword => normalized.includes(keyword));
+  });
+
+  return {
+    time: find(["time","datetime","date time","timestamp","วันที่","เวลา"]),
+    solar: find(["total dc power","pv power","solar power","solar","pv"]),
+    active: find(["total active power","active power"]),
+    charge: find(["battery charging power","charging power","battery charge"]),
+    discharge: find(["battery discharging power","discharging power","battery discharge"])
+  };
+}
+
+function parseDate(v){
+  // Excel may return a real Date object
+  if (v instanceof Date && !isNaN(v.getTime())) return v;
+
+  // Excel serial number, e.g. 46211.5
+  if (typeof v === "number" && Number.isFinite(v)) {
+    const parts = XLSX.SSF.parse_date_code(v);
+    if (parts) {
+      return new Date(parts.y, parts.m - 1, parts.d, parts.H || 0, parts.M || 0, Math.floor(parts.S || 0));
+    }
+  }
+
+  const s = String(v ?? "").trim();
+  if (!s) return null;
+
+  // Format from the uploaded file: 08/Jul/2026 00:00
+  let m = s.match(/^(\d{1,2})\/([A-Za-z]{3})\/(\d{4})[,\sT]+(\d{1,2}):(\d{2})(?::(\d{2}))?$/i);
+  if (m) {
+    const months = {
+      jan:0,feb:1,mar:2,apr:3,may:4,jun:5,
+      jul:6,aug:7,sep:8,oct:9,nov:10,dec:11
+    };
+    const month = months[m[2].toLowerCase()];
+    if (month !== undefined) {
+      return new Date(+m[3], month, +m[1], +m[4], +m[5], +(m[6] || 0));
+    }
+  }
+
+  // DD/MM/YYYY HH:mm or DD-MM-YYYY HH:mm
+  m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})[,\sT]+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if (m) return new Date(+m[3], +m[2]-1, +m[1], +m[4], +m[5], +(m[6] || 0));
+
+  // YYYY-MM-DD HH:mm
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})[,\sT]+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if (m) return new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +(m[6] || 0));
+
+  // Final browser fallback
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+}
+function period(h){ return h>=9&&h<16?0:(h>=16&&h<22?1:2) }
+
+function analyzeUploaded(detected, filename){
+  const tc=detected.time;
+  const sc=detected.solar;
+  const ac=detected.active;
+  const cc=detected.charge;
+  const dc=detected.discharge;
+  const inverterEfficiency=0.96;
+
+  const parsed=rawRows.map(r=>({
+    dt:parseDate(r[tc]),
+    solarDC:Math.max(0,n(r[sc])),
+    active:Math.max(0,Math.abs(n(r[ac]))),
+    charge:cc?Math.max(0,n(r[cc])):0,
+    discharge:dc?Math.max(0,n(r[dc])):0
+  })).filter(x=>x.dt);
+
+  if(!parsed.length) throw new Error("ไม่สามารถอ่านวันและเวลาได้");
+  parsed.sort((a,b)=>a.dt-b.dt);
+
+  const gaps=[];
+  for(let i=0;i<parsed.length-1;i++){
+    const h=(parsed[i+1].dt-parsed[i].dt)/3600000;
+    if(h>0&&h<=6) gaps.push(h);
+  }
+  gaps.sort((a,b)=>a-b);
+  const fallbackInterval=gaps.length?gaps[Math.floor(gaps.length/2)]:1;
+
+  const byDay={};
+  parsed.forEach((x,index)=>{
+    let interval=fallbackInterval;
+    if(index<parsed.length-1){
+      const next=(parsed[index+1].dt-x.dt)/3600000;
+      if(next>0&&next<=fallbackInterval*3) interval=next;
+    }
+
+    let key=new Date(x.dt.getFullYear(),x.dt.getMonth(),x.dt.getDate());
+    if(x.dt.getHours()<9) key.setDate(key.getDate()-1);
+    const k=[key.getFullYear(),String(key.getMonth()+1).padStart(2,"0"),String(key.getDate()).padStart(2,"0")].join("-");
+
+    byDay[k]??={date:key,s:[0,0,0],u:[0,0,0],solarUsed:[0,0,0],charge:[0,0,0],discharge:[0,0,0]};
+    const p=period(x.dt.getHours());
+
+    const solarAvailableAC=Math.max(0,x.solarDC-x.charge)*inverterEfficiency;
+    const directSolarKW=Math.min(x.active,solarAvailableAC);
+
+    byDay[k].s[p]+=x.solarDC*interval;
+    byDay[k].u[p]+=x.active*interval;
+    byDay[k].solarUsed[p]+=directSolarKW*interval;
+    byDay[k].charge[p]+=x.charge*interval;
+    byDay[k].discharge[p]+=x.discharge*interval;
+  });
+
+  const daily=Object.values(byDay).sort((a,b)=>a.date-b.date).map(d=>({
+    date:d.date.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"numeric"}),
+    s:d.s,u:d.u,solarUsed:d.solarUsed,charge:d.charge,discharge:d.discharge
+  }));
+
+  $("siteLabel").textContent="UPLOADED SITE";
+  $("dateRange").textContent=`ข้อมูล ${daily[0].date} – ${daily[daily.length-1].date}`;
+  $("columnWarning").innerHTML="ℹ️ คำนวณจากข้อมูล Energy Storage System: Total active power หมายถึงโหลดที่ระบบ Inverter/ESS จ่าย ไม่รวมโหลดที่อยู่นอกจุดตรวจวัด";
+  $("columnWarning").style.display="block";
+  document.title=`Solar Analysis - ${filename}`;
+  render(daily);
+}
+
+function thaiDateFromISO(isoDate){
+  if(!isoDate) return "-";
+  const [year, month, day] = isoDate.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  return date.toLocaleDateString("th-TH", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  });
+}
+
+function renderBackendResult(result, filename, submittedMetadata){
+  const daily = (result.daily || []).map(item => ({
+    date: thaiDateFromISO(item.date_iso),
+    s: item.solar || [0,0,0],
+    u: item.usage || [0,0,0],
+    solarUsed: item.solar_used || [0,0,0],
+    charge: item.charge || [0,0,0],
+    discharge: item.discharge || [0,0,0]
+  }));
+
+  if(!daily.length){
+    throw new Error("Backend ไม่ได้ส่งข้อมูลรายวันกลับมา");
+  }
+
+  const siteInfo=result.site_info||submittedMetadata||{};
+  $("siteLabel").textContent=siteInfo.site_name||siteInfo.siteName||"UPLOADED SITE";
+  $("dateRange").textContent=`ข้อมูล ${thaiDateFromISO(result.site?.date_from)} – ${thaiDateFromISO(result.site?.date_to)}`;
+  const installedSize=siteInfo.installed_size_kwp??siteInfo.installedSize??0;
+  const batteryStatus=siteInfo.battery_status??"unknown";
+  const installedPanelCount=siteInfo.panel_count??siteInfo.panelCount??0;
+  $("sizeBadge").textContent=`ขนาดติดตั้ง: ${Number(installedSize).toFixed(2)} kWp`;
+  $("batteryBadge").textContent =
+    batteryStatus === "with_battery"
+      ? "Battery: ตรวจพบจาก CSV"
+      : batteryStatus === "without_battery"
+      ? "Battery: ไม่พบการชาร์จ/คายประจุ"
+      : "Battery: ไม่สามารถระบุได้";
+  $("panelBadge").textContent=`จำนวนแผง: ${Number(installedPanelCount)} แผง`;
+  $("siteMeta").style.display="flex";
+
+  $("columnWarning").innerHTML =
+    "ℹ️ ผลวิเคราะห์คำนวณจาก Backend โดย Total active power หมายถึงโหลดที่ระบบ Inverter/ESS จ่าย ไม่รวมโหลดที่อยู่นอกจุดตรวจวัด";
+  $("columnWarning").style.display = "block";
+
+  document.title = `Solar Analysis - ${filename}`;
+
+  // ใช้ข้อมูลรายวันที่ Backend คำนวณแล้วมาแสดงใน Template เดิม
+  render(daily);
+
+  const summary = result.summary || {};
+  const periods = result.periods || {};
+  const recommendations = result.recommendations || {};
+  const panel = result.panel || {};
+
+  $("avgUsage").textContent = f(summary.average_usage_kwh);
+  $("avgSolar").textContent = f(summary.average_solar_kwh);
+  $("coverage").textContent =
+    `${Number(summary.daytime_coverage_percent || 0).toFixed(1)}%`;
+  $("dayCount").textContent = `${result.site?.day_count || daily.length} วัน`;
+
+  const day = periods["09_16"] || {};
+  const evening = periods["16_22"] || {};
+  const night = periods["22_09"] || {};
+
+  $("analysisDay").innerHTML =
+    `<li>Solar ผลิตเฉลี่ย ${f(day.solar_kwh)} kWh/วัน</li>` +
+    `<li>โหลดที่ระบบจ่ายเฉลี่ย ${f(day.usage_kwh)} kWh/วัน</li>` +
+    `<li>Solar จ่ายโหลดโดยตรง ${f(day.solar_used_kwh)} kWh/วัน</li>` +
+    `<li>Solar Coverage ${Number(summary.daytime_coverage_percent || 0).toFixed(1)}%</li>`;
+
+  const coverage = Number(summary.daytime_coverage_percent || 0);
+  $("dayHighlight").textContent =
+    coverage >= 90 ? "✓ Solar ครอบคลุมโหลดกลางวันได้ดีมาก" :
+    coverage >= 70 ? "Solar ครอบคลุมโหลดกลางวันได้ดี" :
+    coverage >= 40 ? "Solar ช่วยลดการพึ่งพา Battery/Grid ได้บางส่วน" :
+    "Solar ยังครอบคลุมโหลดกลางวันค่อนข้างน้อย";
+
+  $("analysisEvening").innerHTML =
+    `<li>Solar ผลิตเฉลี่ย ${f(evening.solar_kwh)} kWh/วัน</li>` +
+    `<li>โหลดที่ระบบจ่ายเฉลี่ย ${f(evening.usage_kwh)} kWh/วัน</li>` +
+    `<li>Battery Discharge เฉลี่ย ${f(evening.battery_discharge_kwh)} kWh/วัน</li>`;
+
+  $("eveningHighlight").textContent =
+    Number(evening.usage_kwh || 0) > Number(evening.solar_kwh || 0) * 2
+      ? "ช่วงนี้พึ่งพา Battery หรือ Grid ค่อนข้างมาก"
+      : "Solar/Battery ยังช่วยช่วงเย็นได้บางส่วน";
+
+  const abnormal = recommendations.abnormal_night_dates || [];
+  $("analysisNight").innerHTML =
+    `<li>Solar ผลิตเฉลี่ย ${f(night.solar_kwh)} kWh/วัน</li>` +
+    `<li>โหลดที่ระบบจ่ายเฉลี่ย ${f(night.usage_kwh)} kWh/วัน</li>` +
+    `<li>Battery Discharge เฉลี่ย ${f(night.battery_discharge_kwh)} kWh/วัน</li>` +
+    `<li>${abnormal.length ? `พบค่าผิดปกติ ${abnormal.map(thaiDateFromISO).join(", ")}` : "ไม่พบวันที่สูงผิดปกติชัดเจน"}</li>`;
+
+  $("nightHighlight").textContent =
+    Number(night.usage_kwh || 0) > Number(day.usage_kwh || 0)
+      ? "ควรตรวจสอบโหลดกลางคืนเพิ่มเติม"
+      : "การใช้ไฟกลางคืนอยู่ในระดับที่ควบคุมได้";
+
+  $("recLoad").textContent = recommendations.load || "-";
+  $("recBattery").textContent = recommendations.battery || "-";
+  $("recNight").textContent = recommendations.night || "-";
+
+  const recommendedPanelCount = Number(panel.recommended_count || 0);
+  $("panelResult").textContent =
+    recommendedPanelCount > 0
+      ? `แนะนำเพิ่มประมาณ ${recommendedPanelCount} แผง`
+      : "ยังไม่จำเป็นต้องเพิ่มแผง";
+
+  $("panelDesc").textContent =
+    `ประเมินจากโหลดกลางวันที่ Solar ยังครอบคลุมไม่ได้เฉลี่ย ` +
+    `${f(panel.uncovered_daytime_kwh)} kWh/วัน โดยสมมติแผง 625 W ` +
+    `ผลิตประมาณ ${f(panel.assumed_panel_daily_yield_kwh || 2.5)} kWh/วัน ` +
+    `ควรตรวจสอบพื้นที่หลังคา String และขนาด Inverter ก่อนติดตั้งจริง`;
+
+  $("costNote").textContent =
+    `ประมาณการมูลค่าไฟจากโหลดที่ระบบจ่ายเฉลี่ย ` +
+    `${f(summary.estimated_daily_cost)} บาท/วัน ` +
+    `(ยังไม่รวมค่าบริการและ VAT) ตัวเลขนี้ไม่รวมโหลดที่อยู่นอกจุดตรวจวัดของ Inverter/ESS`;
+}
+
+function render(daily){
+  const A=[0,1,2].map(i=>avg(daily.map(d=>d.s[i])));
+  const U=[0,1,2].map(i=>avg(daily.map(d=>d.u[i])));
+  const Direct=[0,1,2].map(i=>avg(daily.map(d=>d.solarUsed[i])));
+  const Charge=[0,1,2].map(i=>avg(daily.map(d=>d.charge[i])));
+  const Discharge=[0,1,2].map(i=>avg(daily.map(d=>d.discharge[i])));
+  const solarTotal=sum(A), usageTotal=sum(U);
+  const coverage=U[0]>0?Math.max(0,Math.min(100,(Direct[0]/U[0])*100)):0;
+
+  $("avgUsage").textContent=f(usageTotal);
+  $("avgSolar").textContent=f(solarTotal);
+  $("coverage").textContent=Math.round(coverage)+"%";
+  $("dayCount").textContent=daily.length+" วัน";
+
+  const tbody=daily.map(d=>{
+    const st=sum(d.s),ut=sum(d.u),diff=d.s.map((v,i)=>v-d.u[i]),dt=st-ut;
+    const dayCoverage=d.u[0]>0?Math.min(100,(d.solarUsed[0]/d.u[0])*100):0;
+    let dayNote="ใช้ Solar ช่วยโหลดกลางวันได้บางส่วน";
+    if(dayCoverage>=90) dayNote="Solar ครอบคลุมโหลดกลางวันได้ดี";
+    else if(d.s[0]<A[0]*.6) dayNote="Solar กลางวันผลิตต่ำกว่าปกติ";
+    else if(d.u[0]>d.solarUsed[0]*1.5) dayNote="โหลดกลางวันสูงกว่า Solar ที่ใช้ได้";
+    let nightNote="โหลดกลางคืนอยู่ในระดับปกติ";
+    if(d.u[2]>Math.max(U[2]*1.5,U[2]+5)) nightNote="ใช้ไฟกลางคืนสูงผิดปกติ";
+    else if(d.discharge[2]>0) nightNote="Battery ช่วยจ่ายโหลดกลางคืน";
+    else if(d.u[2]>U[0]) nightNote="โหลดกลางคืนสูงกว่ากลางวัน";
+    const dayClass=dayNote.includes("ต่ำ")||dayNote.includes("สูงกว่า")?"warn":"day-note";
+    const nightClass=nightNote.includes("ผิดปกติ")?"warn":"night-note";
+    return `<tr><td>${d.date}</td>${d.s.map(x=>`<td>${f(x)}</td>`).join("")}<td>${f(st)}</td>${d.u.map(x=>`<td>${f(x)}</td>`).join("")}<td>${f(ut)}</td>${diff.map(x=>`<td class="${x>=0?"pos":"neg"}">${x>=0?"+":""}${f(x)}</td>`).join("")}<td class="${dt>=0?"pos":"neg"}">${dt>=0?"+":""}${f(dt)}</td><td class="${dayClass}">${dayNote}</td><td class="${nightClass}">${nightNote}</td></tr>`;
+  }).join("");
+
+  const D=A.map((v,i)=>v-U[i]), totalDiff=solarTotal-usageTotal;
+  $("dailyBody").innerHTML=tbody+`<tr class="average"><td>เฉลี่ย ${daily.length} วัน</td>${A.map(x=>`<td>${f(x)}</td>`).join("")}<td>${f(solarTotal)}</td>${U.map(x=>`<td>${f(x)}</td>`).join("")}<td>${f(usageTotal)}</td>${D.map(x=>`<td class="${x>=0?"pos":"neg"}">${x>=0?"+":""}${f(x)}</td>`).join("")}<td class="${totalDiff>=0?"pos":"neg"}">${totalDiff>=0?"+":""}${f(totalDiff)}</td><td>–</td><td>–</td></tr>`;
+
+  const abnormal=daily.filter(d=>d.u[2]>Math.max(U[2]*1.5,U[2]+5)).map(d=>d.date);
+  $("analysisDay").innerHTML=`<li>Solar ผลิตเฉลี่ย ${f(A[0])} kWh/วัน</li><li>โหลดที่ระบบจ่ายเฉลี่ย ${f(U[0])} kWh/วัน</li><li>Solar จ่ายโหลดโดยตรง ${f(Direct[0])} kWh/วัน</li><li>Solar Coverage ${Math.round(coverage)}%</li>`;
+  $("dayHighlight").textContent=coverage>=90?"✓ Solar ครอบคลุมโหลดกลางวันได้ดีมาก":coverage>=70?"Solar ครอบคลุมโหลดกลางวันได้ดี":coverage>=40?"Solar ช่วยลดการพึ่งพา Battery/Grid ได้บางส่วน":"Solar ยังครอบคลุมโหลดกลางวันค่อนข้างน้อย";
+
+  $("analysisEvening").innerHTML=`<li>Solar ผลิตเฉลี่ย ${f(A[1])} kWh/วัน</li><li>โหลดที่ระบบจ่ายเฉลี่ย ${f(U[1])} kWh/วัน</li><li>Battery Discharge เฉลี่ย ${f(Discharge[1])} kWh/วัน</li>`;
+  $("eveningHighlight").textContent=U[1]>A[1]*2?"ช่วงนี้พึ่งพา Battery หรือ Grid ค่อนข้างมาก":"Solar/Battery ยังช่วยช่วงเย็นได้บางส่วน";
+
+  $("analysisNight").innerHTML=`<li>Solar ผลิตเฉลี่ย ${f(A[2])} kWh/วัน</li><li>โหลดที่ระบบจ่ายเฉลี่ย ${f(U[2])} kWh/วัน</li><li>Battery Discharge เฉลี่ย ${f(Discharge[2])} kWh/วัน</li><li>${abnormal.length?`พบค่าผิดปกติ ${abnormal.join(", ")}`:"ไม่พบวันที่สูงผิดปกติชัดเจน"}</li>`;
+  $("nightHighlight").textContent=U[2]>U[0]?"ควรตรวจสอบโหลดกลางคืนเพิ่มเติม":"การใช้ไฟกลางคืนอยู่ในระดับที่ควบคุมได้";
+
+  $("recLoad").textContent=coverage<90?"ย้ายเครื่องซักผ้า ปั๊มน้ำ เครื่องทำน้ำร้อน และ EV charger มาใช้ช่วง 09:00–16:00 เพื่อใช้ Solar โดยตรง":"Solar ครอบคลุมโหลดช่วงกลางวันได้ดี ควรรักษาโหลดหลักไว้ในช่วงนี้";
+
+  const solarSurplus=Math.max(0,A[0]-Direct[0]-Charge[0]);
+  const after16=U[1]+U[2];
+  $("recBattery").textContent=solarSurplus>=2&&after16>=8?"มี Solar ส่วนเกินกลางวันและมีโหลดหลัง 16:00 สูง ควรพิจารณาเพิ่มความจุ Battery":Charge[0]>0&&Discharge[1]+Discharge[2]>0?"Battery มีการชาร์จและจ่ายไฟตามปกติ ควรติดตามว่า SOC เพียงพอถึงช่วงกลางคืนหรือไม่":"ข้อมูลยังไม่ชี้ว่าจำเป็นต้องเพิ่ม Battery ทันที";
+
+  $("recNight").textContent=abnormal.length?`ตรวจสอบ EV charger ปั๊มน้ำ Heater แอร์ หรืออุปกรณ์เปิดค้างในวันที่ ${abnormal.join(", ")}`:"ยังไม่พบค่ากลางคืนผิดปกติชัดเจน แต่ควรติดตามต่อเนื่อง";
+
+  const uncovered=Math.max(0,U[0]-Direct[0]),perPanel=2.5,panels=Math.ceil(uncovered/perPanel);
+  $("panelResult").textContent=uncovered<=1?"ยังไม่จำเป็นต้องเพิ่มแผง":`แนะนำเพิ่มประมาณ ${panels} แผง`;
+  $("panelDesc").textContent=`ประเมินจากโหลดกลางวันที่ Solar ยังครอบคลุมไม่ได้เฉลี่ย ${f(uncovered)} kWh/วัน โดยสมมติแผง 625 W ผลิตประมาณ ${perPanel} kWh/วัน ควรตรวจสอบพื้นที่หลังคา String และขนาด Inverter ก่อนติดตั้งจริง`;
+
+  const peak=U[0]+U[1],off=U[2],cost=peak*(5.7982+.1623)+off*(2.6369+.1623);
+  $("costNote").textContent=`ประมาณการมูลค่าไฟจากโหลดที่ระบบจ่ายเฉลี่ย ${f(cost)} บาท/วัน (ยังไม่รวมค่าบริการและ VAT) ตัวเลขนี้ไม่รวมโหลดที่อยู่นอกจุดตรวจวัดของ Inverter/ESS`;
+}
+
+const dropZone=$("dropZone");
+["dragenter","dragover"].forEach(name=>dropZone.addEventListener(name,e=>{e.preventDefault();dropZone.classList.add("dragover")}));
+["dragleave","drop"].forEach(name=>dropZone.addEventListener(name,e=>{e.preventDefault();dropZone.classList.remove("dragover")}));
+dropZone.addEventListener("drop",e=>handleFile(e.dataTransfer.files[0]));
+showEmpty();
+</script>
+</body>
+</html>
