@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Site Management | Solar Analytics</title>
+<style>
+:root{
+  --navy:#0e2f4d;--navy-dark:#07243d;--green:#14966f;--green-dark:#087d5b;
+  --green-soft:#eaf8f3;--blue:#0b4bb3;--blue-soft:#eef5ff;--orange:#f27921;
+  --text:#183249;--muted:#6d8091;--line:#dbe6ef;--bg:#f4f7fb;--white:#fff;
+  --danger:#b42318;--shadow:0 8px 26px rgba(19,50,75,.08);--radius:17px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,"Noto Sans Thai",Tahoma,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh}
+.sidebar{background:linear-gradient(180deg,#0b3458,var(--navy-dark));color:#fff;padding:22px 18px}
+.brand{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:700;margin-bottom:24px}
+.brand-icon{width:54px;height:54px;border-radius:18px;background:#ffffff14;display:grid;place-items:center;font-size:30px}
+.nav a{display:flex;align-items:center;gap:12px;color:#dce8f1;text-decoration:none;border-radius:14px;padding:14px 16px;margin:7px 0;font-weight:700}
+.nav a.active{background:#14b18a;color:#fff}
+.nav b{font-size:20px}
+main{min-width:0;padding:32px 36px 48px}
+.header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:26px}
+h1{font-size:38px;line-height:1.15;margin:0 0 10px;letter-spacing:-.5px}
+.subtitle{color:var(--muted);font-size:17px}
+.analyzer-link{display:inline-flex;align-items:center;gap:8px;color:var(--green-dark);font-weight:800;text-decoration:none;background:var(--green-soft);border:1px solid #bee5d7;border-radius:13px;padding:12px 16px}
+.card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.controls{display:grid;grid-template-columns:minmax(240px,1fr) minmax(220px,340px) auto;gap:12px;padding:16px;margin-bottom:24px}
+.control{position:relative}
+.control input,.control select{width:100%;height:48px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--text);padding:0 14px;outline:none}
+.control input:focus,.control select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(20,150,111,.12)}
+.refresh{height:48px;border:0;border-radius:12px;background:var(--green);color:#fff;padding:0 20px;font-weight:800}
+.refresh:disabled{opacity:.6;cursor:wait}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:28px 0 14px}
+.section-head h2{font-size:22px;margin:0}
+.count{color:var(--muted);font-size:14px;background:#eaf0f5;border-radius:999px;padding:7px 11px}
+.site-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.site-card{padding:20px;display:flex;flex-direction:column;min-height:280px}
+.site-code{display:inline-block;align-self:flex-start;background:var(--green-soft);color:var(--green-dark);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:800}
+.site-card h3{font-size:20px;margin:15px 0 8px}
+.address{color:var(--muted);line-height:1.55;min-height:48px;margin:0 0 16px}
+.site-facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.fact span{display:block;color:var(--muted);font-size:12px;margin-bottom:3px}.fact b{font-size:14px}
+.card-action{margin-top:auto;border:1px solid var(--green);background:#fff;color:var(--green-dark);border-radius:11px;padding:11px 14px;font-weight:800}
+.card-action:hover{background:var(--green-soft)}
+.detail-view{display:none}.detail-view.visible{display:block}.list-view.hidden{display:none}
+.info-card{padding:22px}
+.info-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.info-item{padding:16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-height:82px}
+.info-item:nth-child(4n){border-right:0}.info-item span{display:block;color:var(--muted);font-size:12px;margin-bottom:7px}.info-item b{font-size:15px;overflow-wrap:anywhere}
+.status{display:inline-flex;padding:5px 9px;border-radius:999px;background:var(--green-soft);color:var(--green-dark);font-size:12px}
+.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.metric{padding:21px;min-height:145px}.metric-label{color:var(--muted);font-size:14px}.metric-value{font-size:30px;font-weight:800;margin:14px 0 5px;color:var(--blue)}.metric-unit{font-size:12px;color:var(--muted)}
+.metric.recommendation{grid-column:auto}.metric.recommendation .metric-value{font-size:16px;line-height:1.55;color:var(--text)}
+.table-card{overflow:hidden}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:760px}th,td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--line)}th{background:#f7fafc;color:#526b7e;font-size:12px;text-transform:uppercase;letter-spacing:.04em}td{font-size:14px}tbody tr:hover{background:#fbfdff}
+.view-button{border:0;background:var(--blue-soft);color:var(--blue);border-radius:9px;padding:8px 11px;font-weight:800}
+.empty,.loading,.error{padding:42px;text-align:center;color:var(--muted)}.error{color:var(--danger)}
+.modal{position:fixed;inset:0;background:rgba(7,36,61,.62);display:none;align-items:center;justify-content:center;padding:22px;z-index:20}.modal.open{display:flex}.modal-card{width:min(900px,100%);max-height:88vh;display:flex;flex-direction:column;background:#fff;border-radius:18px;box-shadow:0 24px 70px rgba(7,36,61,.32);overflow:hidden}.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}.modal-head h2{margin:0;font-size:20px}.close{width:38px;height:38px;border:0;border-radius:10px;background:#eef3f7;color:var(--text);font-size:22px}.json{margin:0;padding:20px;overflow:auto;background:#0c253a;color:#dcecf8;line-height:1.55;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-word}
+@media(max-width:1200px){.app{grid-template-columns:92px minmax(0,1fr)}.brand{justify-content:center}.brand span,.nav span{display:none}.nav a{justify-content:center}.site-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.info-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.info-item:nth-child(4n){border-right:1px solid var(--line)}.info-item:nth-child(3n){border-right:0}.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.app{display:block}.sidebar{display:none}main{padding:22px 16px 36px}.header{display:block}.analyzer-link{margin-top:16px}.controls{grid-template-columns:1fr}.site-grid,.summary-grid,.info-grid{grid-template-columns:1fr}.info-item,.info-item:nth-child(3n),.info-item:nth-child(4n){border-right:0}h1{font-size:30px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-icon">☀️</div><span>Solar<br>Analytics</span></div>
+    <nav class="nav">
+      <a class="active" href="sites.html"><b>▦</b><span>Site Management</span></a>
+      <a href="index.html"><b>▣</b><span>CSV Analyzer</span></a>
+    </nav>
+  </aside>
+
+  <main>
+    <header class="header">
+      <div><h1>Site Management</h1><div class="subtitle">View all customer sites and previous analysis results</div></div>
+      <a class="analyzer-link" href="index.html">Open CSV Analyzer →</a>
+    </header>
+
+    <section class="card controls" aria-label="Site controls">
+      <div class="control"><input id="searchInput" type="search" placeholder="Search customer name or site code" aria-label="Search sites"></div>
+      <div class="control"><select id="siteSelect" aria-label="Select site"><option value="">Select Site</option></select></div>
+      <button class="refresh" id="refreshButton" type="button">↻ Refresh</button>
+    </section>
+
+    <section class="list-view" id="listView">
+      <div class="section-head"><h2>All Sites</h2><span class="count" id="siteCount">0 sites</span></div>
+      <div class="site-grid" id="siteGrid"><div class="card loading">Loading sites…</div></div>
+    </section>
+
+    <section class="detail-view" id="detailView">
+      <div class="section-head"><h2>Site Information</h2></div>
+      <div class="card info-card"><div class="info-grid" id="siteInfo"></div></div>
+
+      <div class="section-head"><h2>Latest Analysis Summary</h2><span class="count" id="latestDate">No analysis</span></div>
+      <div class="summary-grid" id="latestSummary"></div>
+
+      <div class="section-head"><h2>Analysis History</h2><span class="count" id="historyCount">0 results</span></div>
+      <div class="card table-card"><div class="table-wrap">
+        <table><thead><tr><th>Analysis Date</th><th>Average Solar</th><th>Average Usage</th><th>Coverage</th><th>View Analysis</th></tr></thead><tbody id="historyBody"></tbody></table>
+      </div></div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="analysisModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card">
+    <div class="modal-head"><h2 id="modalTitle">Stored Analysis Result</h2><button class="close" id="closeModal" type="button" aria-label="Close">×</button></div>
+    <pre class="json" id="jsonPayload"></pre>
+  </div>
+</div>
+
+<script>
+const API_URL = "https://solar-analyzer-api.onrender.com";
+const $ = id => document.getElementById(id);
+let allSites = [];
+let currentHistory = [];
+
+function text(value, fallback = "—") {
+  return value === null || value === undefined || value === "" ? fallback : String(value);
+}
+function escapeHtml(value) {
+  return text(value).replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"})[char]);
+}
+function valueOf(object, ...keys) {
+  for (const key of keys) if (object && object[key] !== null && object[key] !== undefined && object[key] !== "") return object[key];
+  return null;
+}
+function yesNo(value) {
+  if (value === null || value === undefined || value === "") return "—";
+  if (typeof value === "string") return ["true","yes","y","1","with_battery"].includes(value.toLowerCase()) ? "Yes" : "No";
+  return value ? "Yes" : "No";
+}
+function number(value, digits = 2) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed.toFixed(digits) : "—";
+}
+function payloadOf(record) {
+  const payload = record?.result_payload;
+  if (typeof payload !== "string") return payload || {};
+  try { return JSON.parse(payload); } catch { return payload; }
+}
+function analysisDate(record) {
+  const payload = payloadOf(record);
+  const raw = valueOf(record,"created_at","analyzed_at","analysis_date","date") || valueOf(payload?.site,"date_to","date_from");
+  if (!raw) return "—";
+  const date = new Date(raw);
+  return Number.isNaN(date.getTime()) ? text(raw) : date.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+}
+async function api(path) {
+  const response = await fetch(`${API_URL}${path}`, {headers:{Accept:"application/json"}});
+  let body = null;
+  try { body = await response.json(); } catch {}
+  if (!response.ok) throw new Error(body?.detail || "Unable to load site information.");
+  return body;
+}
+
+async function loadSites() {
+  setRefreshing(true);
+  $("siteGrid").innerHTML = '<div class="card loading">Loading sites…</div>';
+  try {
+    const response = await api("/api/sites");
+    allSites = Array.isArray(response) ? response : (response.sites || []);
+    populateDropdown();
+    renderSiteList();
+  } catch (error) {
+    $("siteGrid").innerHTML = `<div class="card error">${escapeHtml(error.message)}</div>`;
+    $("siteCount").textContent = "Unavailable";
+  } finally { setRefreshing(false); }
+}
+function setRefreshing(active) { $("refreshButton").disabled = active; $("refreshButton").textContent = active ? "Refreshing…" : "↻ Refresh"; }
+function populateDropdown() {
+  const selected = $("siteSelect").value;
+  $("siteSelect").innerHTML = '<option value="">Select Site</option>' + allSites.map(site => {
+    const code = valueOf(site,"site_code") || "";
+    const customer = valueOf(site,"customer_name","customer") || "Unnamed customer";
+    return `<option value="${escapeHtml(code)}">${escapeHtml(code)} — ${escapeHtml(customer)}</option>`;
+  }).join("");
+  if (allSites.some(site => String(site.site_code) === selected)) $("siteSelect").value = selected;
+}
+function filteredSites() {
+  const query = $("searchInput").value.trim().toLowerCase();
+  if (!query) return allSites;
+  return allSites.filter(site => [valueOf(site,"site_code"),valueOf(site,"customer_name","customer")].some(value => String(value || "").toLowerCase().includes(query)));
+}
+function renderSiteList() {
+  const sites = filteredSites();
+  $("siteCount").textContent = `${sites.length} ${sites.length === 1 ? "site" : "sites"}`;
+  if (!sites.length) { $("siteGrid").innerHTML = '<div class="card empty">No matching sites found.</div>'; return; }
+  $("siteGrid").innerHTML = sites.map(site => {
+    const code = valueOf(site,"site_code") || "";
+    return `<article class="card site-card">
+      <span class="site-code">${escapeHtml(code)}</span>
+      <h3>${escapeHtml(valueOf(site,"customer_name","customer"))}</h3>
+      <p class="address">${escapeHtml(valueOf(site,"address"))}</p>
+      <div class="site-facts">
+        <div class="fact"><span>Installed Size</span><b>${number(valueOf(site,"installed_size_kwp","installed_size"))} kWp</b></div>
+        <div class="fact"><span>Battery</span><b>${yesNo(valueOf(site,"battery","has_battery"))}</b></div>
+        <div class="fact"><span>TOU</span><b>${yesNo(valueOf(site,"tou","is_tou"))}</b></div>
+        <div class="fact"><span>Last Analysis</span><b data-last-analysis="${escapeHtml(code)}">Loading…</b></div>
+      </div>
+      <button class="card-action" type="button" data-site-code="${escapeHtml(code)}">View Details</button>
+    </article>`;
+  }).join("");
+  document.querySelectorAll("[data-site-code]").forEach(button => button.addEventListener("click",() => selectSite(button.dataset.siteCode)));
+  loadCardDates(sites);
+}
+async function loadCardDates(sites) {
+  await Promise.allSettled(sites.map(async site => {
+    const code = valueOf(site,"site_code");
+    const target = [...document.querySelectorAll("[data-last-analysis]")].find(node => node.dataset.lastAnalysis === String(code));
+    if (!target) return;
+    try { const response = await api(`/api/sites/${encodeURIComponent(code)}/latest`); target.textContent = response.latest ? analysisDate(response.latest) : "No analysis"; }
+    catch { target.textContent = "Unavailable"; }
+  }));
+}
+
+async function selectSite(siteCode) {
+  $("siteSelect").value = siteCode;
+  if (!siteCode) { showList(); return; }
+  $("listView").classList.add("hidden");
+  $("detailView").classList.add("visible");
+  $("siteInfo").innerHTML = '<div class="loading">Loading site…</div>';
+  $("latestSummary").innerHTML = '<div class="card loading">Loading latest analysis…</div>';
+  $("historyBody").innerHTML = '<tr><td colspan="5" class="loading">Loading history…</td></tr>';
+  try {
+    const code = encodeURIComponent(siteCode);
+    const [siteResponse, latestResponse, historyResponse] = await Promise.all([api(`/api/sites/${code}`),api(`/api/sites/${code}/latest`),api(`/api/sites/${code}/history`)]);
+    renderSiteInfo(siteResponse.site || siteResponse);
+    renderLatest(latestResponse.latest || null);
+    currentHistory = historyResponse.history || [];
+    renderHistory(currentHistory);
+  } catch (error) {
+    $("siteInfo").innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
+    $("latestSummary").innerHTML = "";
+    $("historyBody").innerHTML = '<tr><td colspan="5" class="error">Unable to load this site.</td></tr>';
+  }
+}
+function showList() { $("detailView").classList.remove("visible"); $("listView").classList.remove("hidden"); }
+function renderSiteInfo(site) {
+  const fields = [
+    ["Site Code",valueOf(site,"site_code")],["Customer",valueOf(site,"customer_name","customer")],["Address",valueOf(site,"address")],["Telephone",valueOf(site,"tel")],
+    ["Installed Size",`${number(valueOf(site,"installed_size_kwp","installed_size"))} kWp`],["Panel Current",valueOf(site,"panel_current","current_panel_count")],["Panel Maximum",valueOf(site,"panel_max")],["Battery",yesNo(valueOf(site,"battery","has_battery"))],
+    ["Install Date",valueOf(site,"install_date")],
+    ["Battery Size",valueOf(site,"battery_size","battery_size_kwh")],["TOU",yesNo(valueOf(site,"tou","is_tou"))],["Inverter Brand",valueOf(site,"inverter_brand")],["Inverter Model",valueOf(site,"inverter_model")],["Status",valueOf(site,"status")]
+  ];
+  $("siteInfo").innerHTML = fields.map(([label,value]) => `<div class="info-item"><span>${label}</span><b${label === "Status" ? ' class="status"' : ""}>${escapeHtml(value)}</b></div>`).join("");
+}
+function renderLatest(latest) {
+  if (!latest) { $("latestDate").textContent = "No analysis"; $("latestSummary").innerHTML = '<div class="card empty">No analysis results are available for this site.</div>'; return; }
+  $("latestDate").textContent = analysisDate(latest);
+  const cards = [
+    ["Average Solar",`${number(latest.average_solar_kwh)} kWh/day`,""],
+    ["Average Usage",`${number(latest.average_usage_kwh)} kWh/day`,""],
+    ["Solar Coverage",`${number(latest.daytime_coverage_percent,1)}%`,""],
+    ["Recommendation",text(latest.recommendation),"recommendation"]
+  ];
+  $("latestSummary").innerHTML = cards.map(([label,value,className]) => `<div class="card metric ${className}"><div class="metric-label">${label}</div><div class="metric-value">${escapeHtml(value)}</div></div>`).join("");
+}
+function renderHistory(history) {
+  $("historyCount").textContent = `${history.length} ${history.length === 1 ? "result" : "results"}`;
+  if (!history.length) { $("historyBody").innerHTML = '<tr><td colspan="5" class="empty">No analysis history found.</td></tr>'; return; }
+  $("historyBody").innerHTML = history.map((item,index) => `<tr>
+    <td>${escapeHtml(analysisDate(item))}</td><td>${number(item.average_solar_kwh)} kWh/day</td><td>${number(item.average_usage_kwh)} kWh/day</td><td>${number(item.daytime_coverage_percent,1)}%</td>
+    <td><button class="view-button" type="button" data-history-index="${index}">View Analysis</button></td></tr>`).join("");
+  document.querySelectorAll("[data-history-index]").forEach(button => button.addEventListener("click",() => openAnalysis(Number(button.dataset.historyIndex))));
+}
+function openAnalysis(index) {
+  const payload = payloadOf(currentHistory[index]);
+  $("jsonPayload").textContent = typeof payload === "string" ? payload : JSON.stringify(payload,null,2);
+  $("analysisModal").classList.add("open");
+  $("closeModal").focus();
+}
+function closeModal() { $("analysisModal").classList.remove("open"); }
+
+$("searchInput").addEventListener("input",renderSiteList);
+$("siteSelect").addEventListener("change",event => selectSite(event.target.value));
+$("refreshButton").addEventListener("click",async() => { const selected=$("siteSelect").value; await loadSites(); if(selected) await selectSite(selected); });
+$("closeModal").addEventListener("click",closeModal);
+$("analysisModal").addEventListener("click",event => { if(event.target === $("analysisModal")) closeModal(); });
+document.addEventListener("keydown",event => { if(event.key === "Escape") closeModal(); });
+loadSites();
+</script>
+</body>
+</html>

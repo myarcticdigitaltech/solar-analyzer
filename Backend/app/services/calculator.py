@@ -6,10 +6,6 @@ import pandas as pd
 INVERTER_EFFICIENCY = 0.96
 PANEL_DAILY_YIELD_KWH = 2.5
 
-PEAK_RATE = 5.7982
-OFF_PEAK_RATE = 2.6369
-FT_RATE = 0.1623
-
 
 def get_period(hour: int) -> int:
     if 9 <= hour < 16:
@@ -343,24 +339,7 @@ def calculate_analysis(
         else 0
     )
 
-    # 11. ค่าไฟ
-    peak_usage = (
-        average_usage[0]
-        + average_usage[1]
-    )
-
-    off_peak_usage = (
-        average_usage[2]
-    )
-
-    estimated_daily_cost = (
-        peak_usage
-        * (PEAK_RATE + FT_RATE)
-        + off_peak_usage
-        * (OFF_PEAK_RATE + FT_RATE)
-    )
-
-    # 12. Recommendation
+    # 11. Recommendation
     if coverage < 90:
         load_recommendation = (
             "ควรย้ายเครื่องซักผ้า ปั๊มน้ำ "
@@ -432,10 +411,6 @@ def calculate_analysis(
                 ),
             "daytime_coverage_percent":
                 round_number(coverage),
-            "estimated_daily_cost":
-                round_number(
-                    estimated_daily_cost
-                ),
         },
         "periods": {
             "09_16": {
