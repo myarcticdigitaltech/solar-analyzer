@@ -177,9 +177,9 @@ h1{max-width:760px;font-size:38px}
       <p>ระบบจะอ่านข้อมูลรายชั่วโมง แบ่งช่วงเวลา 09:00–16:00, 16:00–22:00 และ 22:00–09:00 แล้ววิเคราะห์ผลตามสูตรที่กำหนดไว้ในเว็บ</p>
       
       <div class="site-form">
-        <div class="site-field"><label for="siteName">ชื่อ Site</label><input id="siteName" type="text" placeholder="เช่น Site 1312"></div>
-        <div class="site-field"><label for="installedSize">ขนาดติดตั้ง (kWp)</label><input id="installedSize" type="number" min="0" step="0.01" placeholder="เช่น 10.00"></div>
-        <div class="site-field"><label for="panelCountInput">จำนวนแผง</label><input id="panelCountInput" type="number" min="0" step="1" placeholder="เช่น 16"></div>
+        <div class="site-field"><label for="siteSelect">เลือก Site</label><select id="siteSelect"><option value="">กำลังโหลด Site...</option></select></div>
+        <div class="site-field"><label for="installedSize">ขนาดติดตั้ง (kWp)</label><input id="installedSize" type="text" readonly placeholder="เลือก Site ก่อน"></div>
+        <div class="site-field"><label for="panelCountInput">จำนวนแผงปัจจุบัน</label><input id="panelCountInput" type="text" readonly placeholder="เลือก Site ก่อน"></div>
       </div>
       <div class="drop-zone" id="dropZone">
         <div style="font-size:38px;margin-bottom:10px">⇧</div>
@@ -240,21 +240,11 @@ h1{max-width:760px;font-size:38px}
     <div class="card rec"><div class="icon">🔎</div><h3>3) ตรวจสอบการใช้ไฟกลางคืน</h3><p id="recNight"></p></div>
   </section>
 
-  <section class="grid bottom">
+  <section class="grid bottom" style="grid-template-columns:1fr">
     <div class="card">
       <h2 style="font-size:18px;margin:0">5. บ้านหลังนี้ควรเพิ่มแผงกี่แผง</h2>
-      <div class="panel-result" id="panelResult">แนะนำเพิ่มประมาณ 2 แผง</div>
+      <div class="panel-result" id="panelResult">-</div>
       <div class="desc" id="panelDesc"></div>
-    </div>
-    <div class="card">
-      <h2 style="font-size:18px;margin:0">6. มูลค่าไฟ</h2>
-      <div class="rates">
-        <div class="rate"><span>Peak</span><b>5.7982</b><small>บาท/หน่วย</small></div>
-        <div class="rate"><span>Off-Peak</span><b>2.6369</b><small>บาท/หน่วย</small></div>
-        <div class="rate"><span>Ft ปัจจุบัน</span><b>0.1623</b><small>บาท/หน่วย</small></div>
-        <div class="rate"><span>Tip</span><b>1 kWp</b><small>≈ 100 kWh/เดือน</small></div>
-      </div>
-      <div class="note" id="costNote"></div>
     </div>
   </section>
 </div></main>
@@ -289,14 +279,63 @@ function showEmpty(){ if($("columnWarning")) $("columnWarning").style.display="n
 function showLoading(){ $("emptyState").style.display="none"; $("loadingState").style.display="flex"; $("dashboardContent").classList.remove("visible"); $("headerActions").style.display="none"; }
 function showDashboard(){ $("emptyState").style.display="none"; $("loadingState").style.display="none"; $("dashboardContent").classList.add("visible"); $("headerActions").style.display="flex"; $("initialSubtitle").style.display="none"; $("resultSubtitle").style.display="block"; }
 const API_URL = "https://solar-analyzer-api.onrender.com";
+let selectedSite = null;
+
+async function loadSitesFromDatabase(){
+  const select = $("siteSelect");
+  try{
+    const response = await fetch(`${API_URL}/api/sites`);
+    const data = await response.json();
+    if(!response.ok) throw new Error(data.detail || "ไม่สามารถโหลด Site ได้");
+
+    const sites = Array.isArray(data) ? data : (data.sites || []);
+    select.innerHTML = '<option value="">เลือก Site...</option>';
+
+    sites.forEach(site => {
+      const option = document.createElement("option");
+      option.value = site.site_code;
+      option.textContent = `${site.site_code}${site.customer_name ? ` - ${site.customer_name}` : ""}`;
+      option.dataset.site = JSON.stringify(site);
+      select.appendChild(option);
+    });
+
+    if(!sites.length){
+      select.innerHTML = '<option value="">ยังไม่มี Site ในระบบ</option>';
+    }
+  }catch(error){
+    console.error(error);
+    select.innerHTML = '<option value="">โหลด Site ไม่สำเร็จ</option>';
+  }
+}
+
+$("siteSelect").addEventListener("change", event => {
+  const option = event.target.options[event.target.selectedIndex];
+  if(!event.target.value){
+    selectedSite = null;
+    $("installedSize").value = "";
+    $("panelCountInput").value = "";
+    return;
+  }
+
+  selectedSite = JSON.parse(option.dataset.site);
+  $("installedSize").value = selectedSite.installed_size_kwp ?? "";
+  $("panelCountInput").value = selectedSite.panel_current ?? "";
+});
+
 function getSiteMetadata(){
-  const siteName=$("siteName").value.trim();
-  const installedSize=Number($("installedSize").value);
-  const panelCount=Number($("panelCountInput").value);
-  if(!siteName) throw new Error("กรุณากรอกชื่อ Site");
-  if(!Number.isFinite(installedSize)||installedSize<=0) throw new Error("กรุณากรอกขนาดติดตั้ง");
-  if(!Number.isFinite(panelCount)||panelCount<0) throw new Error("กรุณากรอกจำนวนแผง");
-  return {siteName,installedSize,panelCount};
+  if(!selectedSite) throw new Error("กรุณาเลือก Site ก่อนวิเคราะห์");
+
+  const installedSize = Number(selectedSite.installed_size_kwp);
+  const panelCount = Number(selectedSite.panel_current);
+  if(!Number.isFinite(installedSize)||installedSize<=0) throw new Error("Site นี้ยังไม่มีข้อมูลขนาดติดตั้ง (kWp)");
+  if(!Number.isFinite(panelCount)||panelCount<0) throw new Error("Site นี้ยังไม่มีข้อมูลจำนวนแผง");
+
+  return {
+    siteCode: selectedSite.site_code,
+    siteName: selectedSite.customer_name || selectedSite.site_code,
+    installedSize,
+    panelCount
+  };
 }
 
 async function handleFile(file){
@@ -308,6 +347,7 @@ async function handleFile(file){
     const metadata=getSiteMetadata();
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("site_code", metadata.siteCode);
     formData.append("site_name", metadata.siteName);
     formData.append("installed_size_kwp", String(metadata.installedSize));
     formData.append("panel_count", String(metadata.panelCount));
@@ -578,10 +618,6 @@ function renderBackendResult(result, filename, submittedMetadata){
     `ผลิตประมาณ ${f(panel.assumed_panel_daily_yield_kwh || 2.5)} kWh/วัน ` +
     `ควรตรวจสอบพื้นที่หลังคา String และขนาด Inverter ก่อนติดตั้งจริง`;
 
-  $("costNote").textContent =
-    `ประมาณการมูลค่าไฟจากโหลดที่ระบบจ่ายเฉลี่ย ` +
-    `${f(summary.estimated_daily_cost)} บาท/วัน ` +
-    `(ยังไม่รวมค่าบริการและ VAT) ตัวเลขนี้ไม่รวมโหลดที่อยู่นอกจุดตรวจวัดของ Inverter/ESS`;
 }
 
 function render(daily){
@@ -639,14 +675,13 @@ function render(daily){
   $("panelResult").textContent=uncovered<=1?"ยังไม่จำเป็นต้องเพิ่มแผง":`แนะนำเพิ่มประมาณ ${panels} แผง`;
   $("panelDesc").textContent=`ประเมินจากโหลดกลางวันที่ Solar ยังครอบคลุมไม่ได้เฉลี่ย ${f(uncovered)} kWh/วัน โดยสมมติแผง 625 W ผลิตประมาณ ${perPanel} kWh/วัน ควรตรวจสอบพื้นที่หลังคา String และขนาด Inverter ก่อนติดตั้งจริง`;
 
-  const peak=U[0]+U[1],off=U[2],cost=peak*(5.7982+.1623)+off*(2.6369+.1623);
-  $("costNote").textContent=`ประมาณการมูลค่าไฟจากโหลดที่ระบบจ่ายเฉลี่ย ${f(cost)} บาท/วัน (ยังไม่รวมค่าบริการและ VAT) ตัวเลขนี้ไม่รวมโหลดที่อยู่นอกจุดตรวจวัดของ Inverter/ESS`;
 }
 
 const dropZone=$("dropZone");
 ["dragenter","dragover"].forEach(name=>dropZone.addEventListener(name,e=>{e.preventDefault();dropZone.classList.add("dragover")}));
 ["dragleave","drop"].forEach(name=>dropZone.addEventListener(name,e=>{e.preventDefault();dropZone.classList.remove("dragover")}));
 dropZone.addEventListener("drop",e=>handleFile(e.dataTransfer.files[0]));
+loadSitesFromDatabase();
 showEmpty();
 </script>
 </body>
