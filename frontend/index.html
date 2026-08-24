@@ -184,6 +184,69 @@ h1{max-width:760px;font-size:38px}
   .dashboard-content{display:block!important}
 }
 
+
+/* FIX: allow long Add Site modal to scroll */
+#siteCreateForm{
+  display:flex;
+  flex-direction:column;
+  flex:1;
+  min-height:0;
+  overflow:hidden;
+}
+.site-modal-card{
+  height:min(90vh,960px);
+  max-height:90vh;
+}
+.site-create-form{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+}
+.site-modal-head,
+.site-modal-actions{
+  flex:0 0 auto;
+}
+.site-modal-actions{
+  position:sticky;
+  bottom:0;
+  background:#fff;
+  z-index:2;
+}
+@media(max-width:700px){
+  .site-modal{
+    padding:10px;
+    align-items:stretch;
+  }
+  .site-modal-card{
+    height:calc(100vh - 20px);
+    max-height:calc(100vh - 20px);
+    border-radius:16px;
+  }
+}
+
+
+/* Unit suffix fields */
+.input-unit{display:flex;align-items:stretch}
+.input-unit input{border-top-right-radius:0!important;border-bottom-right-radius:0!important}
+.input-unit .unit-suffix{
+  min-width:72px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 12px;
+  border:1px solid var(--line);
+  border-left:0;
+  border-radius:0 11px 11px 0;
+  background:#f7fafc;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:800;
+  white-space:nowrap
+}
+.unit-note{font-size:12px;color:var(--muted);margin-top:5px}
+
 </style>
 </head>
 <body>
@@ -337,11 +400,11 @@ h1{max-width:760px;font-size:38px}
 
           <div class="site-create-field">
             <label for="newSiteCode">Site Code *</label>
-            <input id="newSiteCode" name="site_code" required placeholder="เช่น SITE002">
+            <input id="newSiteCode" name="site_code" required placeholder="SITE-1001">
           </div>
           <div class="site-create-field">
             <label for="newSiteName">Site Name</label>
-            <input id="newSiteName" name="site_name" placeholder="เช่น บ้านคุณสมชาย">
+            <input id="newSiteName" name="site_name" placeholder="SITE-1001-บ้านxxx_xxxx(มบ.xxx)">
           </div>
           <div class="site-create-field">
             <label for="newCustomerName">Customer Name</label>
@@ -386,19 +449,19 @@ h1{max-width:760px;font-size:38px}
           </div>
           <div class="site-create-field">
             <label for="newPvBrand">PV Brand</label>
-            <input id="newPvBrand" name="pv_brand">
+            <div class="input-unit"><input id="newPvBrand" name="pv_brand"><span class="unit-suffix">Tier1</span></div>
           </div>
           <div class="site-create-field">
-            <label for="newPvSizeModule">PV Size Module (W)</label>
-            <input id="newPvSizeModule" name="pv_size_module_w" type="number" min="0" step="0.01">
+            <label for="newPvSizeModule">PV Size Module</label>
+            <div class="input-unit"><input id="newPvSizeModule" name="pv_size_module_w" type="number" min="0" step="0.01"><span class="unit-suffix">W.</span></div>
           </div>
           <div class="site-create-field">
-            <label for="newInstalledSize">PV Capacity / Installed Size (kWp) *</label>
-            <input id="newInstalledSize" name="installed_size_kwp" type="number" min="0" step="0.01" required>
+            <label for="newInstalledSize">PV Capacity / Installed Size *</label>
+            <div class="input-unit"><input id="newInstalledSize" name="installed_size_kwp" type="number" min="0" step="0.01" required><span class="unit-suffix">kWp</span></div>
           </div>
           <div class="site-create-field">
             <label for="newPanelCurrent">PV QTY Module / Panel Current *</label>
-            <input id="newPanelCurrent" name="panel_current" type="number" min="0" step="1" required>
+            <div class="input-unit"><input id="newPanelCurrent" name="panel_current" type="number" min="0" step="1" required><span class="unit-suffix">Module</span></div>
           </div>
           <div class="site-create-field">
             <label for="newPanelMax">Panel Maximum</label>
@@ -415,11 +478,11 @@ h1{max-width:760px;font-size:38px}
           </div>
           <div class="site-create-field">
             <label for="newInverterPhase">Inverter Phase</label>
-            <input id="newInverterPhase" name="inverter_phase">
+            <div class="input-unit"><input id="newInverterPhase" name="inverter_phase"><span class="unit-suffix">Phase</span></div>
           </div>
           <div class="site-create-field">
-            <label for="newInverterSize">Inverter Size (kW)</label>
-            <input id="newInverterSize" name="inverter_size_kw" type="number" min="0" step="0.01">
+            <label for="newInverterSize">Inverter Size</label>
+            <div class="input-unit"><input id="newInverterSize" name="inverter_size_kw" type="number" min="0" step="0.01"><span class="unit-suffix">kW.</span></div>
           </div>
 
           <div class="site-create-field">
@@ -439,11 +502,11 @@ h1{max-width:760px;font-size:38px}
           </div>
           <div class="site-create-field">
             <label for="newBatteryPhase">Battery Phase</label>
-            <input id="newBatteryPhase" name="battery_phase">
+            <div class="input-unit"><input id="newBatteryPhase" name="battery_phase"><span class="unit-suffix">Phase</span></div>
           </div>
           <div class="site-create-field">
-            <label for="newBatterySize">Battery Size (kWh)</label>
-            <input id="newBatterySize" name="battery_size_kwh" type="number" min="0" step="0.01">
+            <label for="newBatterySize">Battery Size</label>
+            <div class="input-unit"><input id="newBatterySize" name="battery_size_kwh" type="number" min="0" step="0.01"><span class="unit-suffix">kWh.</span></div>
           </div>
 
           <div class="site-create-field">
@@ -456,30 +519,30 @@ h1{max-width:760px;font-size:38px}
           </div>
           <div class="site-create-field">
             <label for="newBackupPhase">Backup Phase</label>
-            <input id="newBackupPhase" name="backup_phase">
+            <div class="input-unit"><input id="newBackupPhase" name="backup_phase"><span class="unit-suffix">Phase</span></div>
           </div>
           <div class="site-create-field">
-            <label for="newBackupSize">Backup Size (amp)</label>
-            <input id="newBackupSize" name="backup_size_amp" type="number" min="0" step="0.01">
+            <label for="newBackupSize">Backup Size</label>
+            <div class="input-unit"><input id="newBackupSize" name="backup_size_amp" type="number" min="0" step="0.01"><span class="unit-suffix">amp.</span></div>
           </div>
 
           <div class="section-divider future">Site Intelligent (Future)</div>
 
           <div class="site-create-field">
             <label for="intPvBrand">PV Brand</label>
-            <input id="intPvBrand">
+            <div class="input-unit"><input id="intPvBrand"><span class="unit-suffix">Tier1</span></div>
           </div>
           <div class="site-create-field">
-            <label for="intPvSizeModule">PV Size Module (W)</label>
-            <input id="intPvSizeModule" type="number" min="0" step="0.01">
+            <label for="intPvSizeModule">PV Size Module</label>
+            <div class="input-unit"><input id="intPvSizeModule" type="number" min="0" step="0.01"><span class="unit-suffix">W.</span></div>
           </div>
           <div class="site-create-field">
-            <label for="intPvCapacity">PV Capacity (kWp)</label>
-            <input id="intPvCapacity" type="number" min="0" step="0.01">
+            <label for="intPvCapacity">PV Capacity</label>
+            <div class="input-unit"><input id="intPvCapacity" type="number" min="0" step="0.01"><span class="unit-suffix">kWp.</span></div>
           </div>
           <div class="site-create-field">
             <label for="intPvQty">PV QTY Module</label>
-            <input id="intPvQty" type="number" min="0" step="1">
+            <div class="input-unit"><input id="intPvQty" type="number" min="0" step="1"><span class="unit-suffix">Module</span></div>
           </div>
 
           <div class="site-create-field">
@@ -492,11 +555,11 @@ h1{max-width:760px;font-size:38px}
           </div>
           <div class="site-create-field">
             <label for="intInverterPhase">Inverter Phase</label>
-            <input id="intInverterPhase">
+            <div class="input-unit"><input id="intInverterPhase"><span class="unit-suffix">Phase</span></div>
           </div>
           <div class="site-create-field">
-            <label for="intInverterSize">Inverter Size (kW)</label>
-            <input id="intInverterSize" type="number" min="0" step="0.01">
+            <label for="intInverterSize">Inverter Size</label>
+            <div class="input-unit"><input id="intInverterSize" type="number" min="0" step="0.01"><span class="unit-suffix">kW.</span></div>
           </div>
 
           <div class="site-create-field">
@@ -509,11 +572,11 @@ h1{max-width:760px;font-size:38px}
           </div>
           <div class="site-create-field">
             <label for="intBatteryPhase">Battery Phase</label>
-            <input id="intBatteryPhase">
+            <div class="input-unit"><input id="intBatteryPhase"><span class="unit-suffix">Phase</span></div>
           </div>
           <div class="site-create-field">
-            <label for="intBatterySize">Battery Size (kWh)</label>
-            <input id="intBatterySize" type="number" min="0" step="0.01">
+            <label for="intBatterySize">Battery Size</label>
+            <div class="input-unit"><input id="intBatterySize" type="number" min="0" step="0.01"><span class="unit-suffix">kWh.</span></div>
           </div>
 
           <div class="site-create-field">
@@ -526,11 +589,11 @@ h1{max-width:760px;font-size:38px}
           </div>
           <div class="site-create-field">
             <label for="intBackupPhase">Backup Phase</label>
-            <input id="intBackupPhase">
+            <div class="input-unit"><input id="intBackupPhase"><span class="unit-suffix">Phase</span></div>
           </div>
           <div class="site-create-field">
-            <label for="intBackupSize">Backup Size (amp)</label>
-            <input id="intBackupSize" type="number" min="0" step="0.01">
+            <label for="intBackupSize">Backup Size</label>
+            <div class="input-unit"><input id="intBackupSize" type="number" min="0" step="0.01"><span class="unit-suffix">amp.</span></div>
           </div>
 
         </div>
