@@ -1270,12 +1270,58 @@ function render(daily){
 
 }
 
+
+async function loadHistoryPlaybackIfRequested(){
+  const params = new URLSearchParams(location.search);
+  if(params.get("history") !== "1") return false;
+
+  const raw = sessionStorage.getItem("solarHistoryResult");
+  if(!raw) return false;
+
+  try{
+    const saved = JSON.parse(raw);
+    const result = saved.result;
+    const site = saved.site || {};
+    if(!result) return false;
+
+    const metadata = {
+      siteCode: site.site_code || result.site_info?.site_code || "",
+      siteName: site.site_name || site.customer_name || result.site_info?.site_name || site.site_code || "Historical Analysis",
+      installedSize: Number(site.installed_size_kwp ?? result.site_info?.installed_size_kwp ?? 0),
+      panelCount: Number(site.panel_current ?? result.site_info?.panel_count ?? 0)
+    };
+
+    renderBackendResult(result, `History ${saved.history?.analysis_date || ""}`, metadata);
+    showDashboard();
+
+    if($("headerActions")){
+      $("headerActions").style.display = "flex";
+      const upload = $("headerActions").querySelector("label.file-label");
+      if(upload) upload.style.display = "none";
+    }
+
+    $("initialSubtitle").style.display = "none";
+    $("resultSubtitle").style.display = "block";
+    $("dateRange").textContent = `Historical Analysis • ${saved.history?.analysis_date ? new Date(saved.history.analysis_date).toLocaleDateString("en-GB") : ""}`;
+
+    const back = document.createElement("a");
+    back.href = `sites.html`;
+    back.textContent = "← Back to Site History";
+    back.style.cssText = "display:inline-flex;margin-top:12px;color:#087d5b;font-weight:800;text-decoration:none";
+    $("resultSubtitle").parentElement.appendChild(back);
+    return true;
+  }catch(error){
+    console.error("Unable to load historical analysis", error);
+    return false;
+  }
+}
+
 const dropZone=$("dropZone");
 ["dragenter","dragover"].forEach(name=>dropZone.addEventListener(name,e=>{e.preventDefault();dropZone.classList.add("dragover")}));
 ["dragleave","drop"].forEach(name=>dropZone.addEventListener(name,e=>{e.preventDefault();dropZone.classList.remove("dragover")}));
 dropZone.addEventListener("drop",e=>handleFile(e.dataTransfer.files[0]));
 loadSitesFromDatabase();
-showEmpty();
+loadHistoryPlaybackIfRequested().then(loaded => { if(!loaded) showEmpty(); });
 </script>
 </body>
 </html>

@@ -1,440 +1,395 @@
 <!doctype html>
-<html lang="en">
+<html lang="th">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Site Management | Solar Analytics</title>
+<title>Sites & History | Solar Analytics</title>
 <style>
 :root{
-  --navy:#0e2f4d;--navy-dark:#07243d;--green:#14966f;--green-dark:#087d5b;
-  --green-soft:#eaf8f3;--blue:#0b4bb3;--blue-soft:#eef5ff;
-  --text:#183249;--muted:#6d8091;--line:#dbe6ef;--bg:#f4f7fb;--white:#fff;
-  --danger:#b42318;--shadow:0 8px 26px rgba(19,50,75,.08);--radius:17px;
+  --navy:#0e2f4d;--navy-dark:#07243d;--green:#14966f;--green-dark:#087d5b;--green-soft:#eaf8f3;
+  --blue:#0b4bb3;--blue-soft:#eef5ff;--text:#183249;--muted:#6d8091;--line:#dbe6ef;--bg:#f4f7fb;
+  --white:#fff;--danger:#b42318;--shadow:0 8px 26px rgba(19,50,75,.08);--radius:17px;
+  --customer:#fff4f1;--customer-border:#ffd4ca;--customer-text:#a64022;
+  --current:#eef8ef;--current-border:#cfe7d3;--current-text:#24703a;
+  --future:#fff0fb;--future-border:#efd1e8;--future-text:#8a2c72;
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,"Noto Sans Thai",Tahoma,sans-serif;background:var(--bg);color:var(--text)}
-button,input,select{font:inherit}
+button,input,select,textarea{font:inherit}
 button{cursor:pointer}
 .app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh}
 .sidebar{background:linear-gradient(180deg,#0b3458,var(--navy-dark));color:#fff;padding:22px 18px}
 .brand{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:700;margin-bottom:24px}
 .brand-icon{width:54px;height:54px;border-radius:18px;background:#ffffff14;display:grid;place-items:center;font-size:30px}
 .nav a{display:flex;align-items:center;gap:12px;color:#dce8f1;text-decoration:none;border-radius:14px;padding:14px 16px;margin:7px 0;font-weight:700}
-.nav a.active{background:#14b18a;color:#fff}
-.nav b{font-size:20px}
+.nav a.active{background:#14b18a;color:#fff}.nav b{font-size:20px}
 main{min-width:0;padding:32px 36px 48px}
-.header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:26px}
-h1{font-size:38px;line-height:1.15;margin:0 0 10px;letter-spacing:-.5px}
-.subtitle{color:var(--muted);font-size:17px}
-.header-actions,.detail-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.primary-button{border:1px solid var(--green);border-radius:12px;background:var(--green);color:#fff;padding:12px 16px;font-weight:800}.secondary-button{border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--text);padding:12px 16px;font-weight:800}.danger-button{border:1px solid #f2c7c3;border-radius:12px;background:#fff5f4;color:var(--danger);padding:12px 16px;font-weight:800}
-.card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:24px}
+h1{font-size:38px;line-height:1.15;margin:0 0 10px}.subtitle{color:var(--muted);font-size:17px}
+.actions,.detail-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.primary,.secondary,.danger{border-radius:12px;padding:12px 16px;font-weight:800}
+.primary{border:1px solid var(--green);background:var(--green);color:#fff}
+.secondary{border:1px solid var(--line);background:#fff;color:var(--text)}
+.danger{border:1px solid #f2c7c3;background:#fff5f4;color:var(--danger)}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
 .controls{display:grid;grid-template-columns:minmax(240px,1fr) minmax(220px,340px) auto;gap:12px;padding:16px;margin-bottom:24px}
-.control{position:relative}
-.control input,.control select{width:100%;height:48px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--text);padding:0 14px;outline:none}
-.control input:focus,.control select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(20,150,111,.12)}
-.refresh{height:48px;border:0;border-radius:12px;background:var(--green);color:#fff;padding:0 20px;font-weight:800}
-.refresh:disabled{opacity:.6;cursor:wait}
-.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:28px 0 14px}
-.section-head h2{font-size:22px;margin:0}
-.count{color:var(--muted);font-size:14px;background:#eaf0f5;border-radius:999px;padding:7px 11px}
+.controls input,.controls select{height:48px;width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;padding:0 14px}
 .site-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.site-card{padding:20px;display:flex;flex-direction:column;min-height:280px}
-.site-code{display:inline-block;align-self:flex-start;background:var(--green-soft);color:var(--green-dark);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:800}
-.site-card h3{font-size:20px;margin:15px 0 8px}
-.address{color:var(--muted);line-height:1.55;min-height:48px;margin:0 0 16px}
-.site-facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
-.fact span{display:block;color:var(--muted);font-size:12px;margin-bottom:3px}.fact b{font-size:14px}
-.card-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:auto}.card-action{flex:1;border:1px solid var(--green);background:#fff;color:var(--green-dark);border-radius:11px;padding:10px 12px;font-weight:800}.card-action.edit{border-color:var(--line);color:var(--text)}.card-action.delete{flex:0 0 auto;border-color:#f2c7c3;color:var(--danger)}
-.card-action:hover{background:var(--green-soft)}
-.detail-view{display:none}.detail-view.visible{display:block}.list-view.hidden{display:none}
-.info-card{padding:22px}
-.info-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.info-item{padding:16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-height:82px}
-.info-item:nth-child(4n){border-right:0}.info-item span{display:block;color:var(--muted);font-size:12px;margin-bottom:7px}.info-item b{font-size:15px;overflow-wrap:anywhere}
-.status{display:inline-flex;padding:5px 9px;border-radius:999px;background:var(--green-soft);color:var(--green-dark);font-size:12px}
-.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
-.metric{padding:21px;min-height:145px}.metric-label{color:var(--muted);font-size:14px}.metric-value{font-size:30px;font-weight:800;margin:14px 0 5px;color:var(--blue)}
-.metric.recommendation{grid-column:auto}.metric.recommendation .metric-value{font-size:16px;line-height:1.55;color:var(--text)}
-.table-card{overflow:hidden}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:760px}th,td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--line)}th{background:#f7fafc;color:#526b7e;font-size:12px;text-transform:uppercase;letter-spacing:.04em}td{font-size:14px}tbody tr:hover{background:#fbfdff}
-.view-button{border:0;background:var(--blue-soft);color:var(--blue);border-radius:9px;padding:8px 11px;font-weight:800}
+.site-card{padding:20px;display:flex;flex-direction:column;min-height:245px}
+.site-code{display:inline-flex;align-self:flex-start;padding:6px 10px;border-radius:999px;background:var(--green-soft);color:var(--green-dark);font-size:12px;font-weight:800}
+.site-card h3{font-size:19px;margin:14px 0 8px}.site-card p{color:var(--muted);line-height:1.5;margin:0 0 15px}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}.fact span{display:block;color:var(--muted);font-size:12px}.fact b{font-size:14px}
+.card-actions{margin-top:auto;display:flex;gap:8px}.card-actions button{flex:1}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:28px 0 14px}.section-head h2{margin:0;font-size:22px}.count{padding:7px 11px;border-radius:999px;background:#eaf0f5;color:var(--muted);font-size:13px}
+.list-view.hidden{display:none}.detail-view{display:none}.detail-view.visible{display:block}
+.master-section{padding:20px;margin-bottom:16px}.master-title{padding:12px 14px;border-radius:11px;margin-bottom:16px;font-size:18px;font-weight:800}
+.master-title.customer{background:var(--customer);border:1px solid var(--customer-border);color:var(--customer-text)}
+.master-title.current{background:var(--current);border:1px solid var(--current-border);color:var(--current-text)}
+.master-title.future{background:var(--future);border:1px solid var(--future-border);color:var(--future-text)}
+.info-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:13px;overflow:hidden}
+.info-item{padding:15px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-height:76px}.info-item:nth-child(4n){border-right:0}
+.info-item span{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}.info-item b{font-size:14px;overflow-wrap:anywhere}
+.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.metric{padding:20px;min-height:140px}.metric span{color:var(--muted);font-size:14px}.metric b{display:block;color:var(--blue);font-size:29px;margin-top:13px}
+.table-wrap{overflow:auto}.table-card{overflow:hidden}table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--line)}th{font-size:12px;text-transform:uppercase;color:#526b7e;background:#f7fafc}td{font-size:14px}
+.view-analysis{border:0;background:var(--blue-soft);color:var(--blue);border-radius:9px;padding:8px 11px;font-weight:800}
 .empty,.loading,.error{padding:42px;text-align:center;color:var(--muted)}.error{color:var(--danger)}
-.modal{position:fixed;inset:0;background:rgba(7,36,61,.62);display:none;align-items:center;justify-content:center;padding:22px;z-index:20}.modal.open{display:flex}.modal-card{width:min(900px,100%);max-height:88vh;display:flex;flex-direction:column;background:#fff;border-radius:18px;box-shadow:0 24px 70px rgba(7,36,61,.32);overflow:hidden}.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}.modal-head h2{margin:0;font-size:20px}.close{width:38px;height:38px;border:0;border-radius:10px;background:#eef3f7;color:var(--text);font-size:22px}.json{margin:0;padding:20px;overflow:auto;background:#0c253a;color:#dcecf8;line-height:1.55;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-word}.site-form{padding:20px;overflow:auto}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.form-field.full{grid-column:1/-1}.form-field label{display:block;font-size:13px;font-weight:800;margin-bottom:6px}.form-field input,.form-field select,.form-field textarea{width:100%;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--text);padding:11px 12px;outline:none}.form-field textarea{min-height:82px;resize:vertical}.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(20,150,111,.12)}.form-error{display:none;margin:0 20px 15px;padding:11px 13px;border-radius:10px;background:#fff2f0;color:var(--danger);font-size:14px}.form-error.visible{display:block}.modal-actions{display:flex;justify-content:flex-end;gap:10px;padding:16px 20px;border-top:1px solid var(--line)}.modal-actions button:disabled{opacity:.6;cursor:wait}.toast{position:fixed;right:24px;bottom:24px;z-index:30;max-width:420px;padding:14px 18px;border-radius:12px;background:var(--navy);color:#fff;box-shadow:0 12px 34px rgba(7,36,61,.25);display:none}.toast.visible{display:block}.toast.error-toast{background:var(--danger)}
-@media(max-width:1200px){.app{grid-template-columns:92px minmax(0,1fr)}.brand{justify-content:center}.brand span,.nav span{display:none}.nav a{justify-content:center}.site-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.info-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.info-item:nth-child(4n){border-right:1px solid var(--line)}.info-item:nth-child(3n){border-right:0}.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:760px){.app{display:block}.sidebar{display:none}main{padding:22px 16px 36px}.header{display:block}.header>div:last-child{margin-top:16px}.controls{grid-template-columns:1fr}.site-grid,.summary-grid,.info-grid,.form-grid{grid-template-columns:1fr}.form-field.full{grid-column:auto}.info-item,.info-item:nth-child(3n),.info-item:nth-child(4n){border-right:0}h1{font-size:30px}}
+.modal{position:fixed;inset:0;background:rgba(7,36,61,.62);display:none;align-items:center;justify-content:center;padding:22px;z-index:30}.modal.open{display:flex}
+.modal-card{width:min(980px,100%);height:min(92vh,980px);max-height:92vh;background:#fff;border-radius:18px;box-shadow:0 24px 70px rgba(7,36,61,.32);display:flex;flex-direction:column;overflow:hidden}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line)}.modal-head h2{margin:0;font-size:21px}.close{width:38px;height:38px;border:0;border-radius:10px;background:#eef3f7;font-size:22px}
+#siteForm{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}.form-scroll{flex:1;min-height:0;overflow-y:auto;padding:20px;-webkit-overflow-scrolling:touch}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.form-field.full,.form-section{grid-column:1/-1}
+.form-section{padding:10px 12px;border-radius:10px;font-weight:800;margin-top:6px}.form-section.customer{background:var(--customer);border:1px solid var(--customer-border);color:var(--customer-text)}.form-section.current{background:var(--current);border:1px solid var(--current-border);color:var(--current-text)}.form-section.future{background:var(--future);border:1px solid var(--future-border);color:var(--future-text)}
+.form-field label{display:block;font-size:13px;font-weight:800;margin-bottom:6px}.form-field input,.form-field select,.form-field textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px 12px;background:#fff}.form-field textarea{min-height:78px;resize:vertical}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;padding:16px 20px;border-top:1px solid var(--line);background:#fff;flex:0 0 auto}.form-error{display:none;margin:0 20px 14px;padding:11px 13px;border-radius:10px;background:#fff2f0;color:var(--danger)}.form-error.visible{display:block}
+.toast{position:fixed;right:24px;bottom:24px;z-index:50;display:none;background:var(--navy);color:#fff;padding:14px 18px;border-radius:12px;box-shadow:var(--shadow)}.toast.visible{display:block}.toast.error{background:var(--danger)}
+@media print{
+  .sidebar,.header,.controls,.detail-actions,.view-analysis,.card-actions{display:none!important}
+  .app{display:block}.list-view{display:none!important}.detail-view{display:block!important}main{padding:0}body{background:#fff}.card{box-shadow:none}
+}
+@media(max-width:1200px){.app{grid-template-columns:92px 1fr}.brand span,.nav span{display:none}.nav a{justify-content:center}.site-grid{grid-template-columns:repeat(2,1fr)}.info-grid{grid-template-columns:repeat(3,1fr)}.info-item:nth-child(4n){border-right:1px solid var(--line)}.info-item:nth-child(3n){border-right:0}.summary-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.app{display:block}.sidebar{display:none}main{padding:20px 16px 36px}.header{display:block}.actions{margin-top:14px}.controls,.site-grid,.summary-grid,.info-grid,.form-grid{grid-template-columns:1fr}.info-item,.info-item:nth-child(3n),.info-item:nth-child(4n){border-right:0}.modal{padding:8px}.modal-card{height:calc(100vh - 16px);max-height:calc(100vh - 16px)}}
 </style>
 </head>
 <body>
 <div class="app">
-  <aside class="sidebar">
-    <div class="brand"><div class="brand-icon">☀️</div><span>Solar<br>Analytics</span></div>
-    <nav class="nav">
-      <a href="index.html"><b>▣</b><span>Dashboard</span></a>
-      <a class="active" href="sites.html"><b>▦</b><span>Sites &amp; History</span></a>
-      <a href="index.html#table"><b>▤</b><span>Daily Analysis</span></a>
-      <a href="index.html#recommendation"><b>✓</b><span>Recommendation</span></a>
-    </nav>
-  </aside>
+<aside class="sidebar">
+  <div class="brand"><div class="brand-icon">☀️</div><span>Solar<br>Analytics</span></div>
+  <nav class="nav">
+    <a href="index.html"><b>▣</b><span>Dashboard</span></a>
+    <a class="active" href="sites.html"><b>▦</b><span>Sites &amp; History</span></a>
+    <a href="index.html#table"><b>▤</b><span>Daily Analysis</span></a>
+    <a href="index.html#recommendation"><b>✓</b><span>Recommendation</span></a>
+  </nav>
+</aside>
 
-  <main>
-    <header class="header">
-      <div><h1>Site Management</h1><div class="subtitle">View all customer sites and previous analysis results</div></div>
-      <div class="header-actions"><button class="primary-button" id="addSiteButton" type="button">+ Add Site</button></div>
-    </header>
+<main>
+  <header class="header">
+    <div><h1>Sites & History</h1><div class="subtitle">ข้อมูล Site และผลวิเคราะห์ย้อนหลัง</div></div>
+    <div class="actions">
+      <button class="primary" id="addSiteButton" type="button">+ Add Site</button>
+      <a class="secondary" href="index.html" style="text-decoration:none">Open Analyzer →</a>
+    </div>
+  </header>
 
-    <section class="card controls" aria-label="Site controls">
-      <div class="control"><input id="searchInput" type="search" placeholder="Search customer name or site code" aria-label="Search sites"></div>
-      <div class="control"><select id="siteSelect" aria-label="Select site"><option value="">Select Site</option></select></div>
-      <button class="refresh" id="refreshButton" type="button">↻ Refresh</button>
+  <section class="card controls">
+    <input id="searchInput" placeholder="ค้นหา Site Code / Site Name / Customer">
+    <select id="siteSelect"><option value="">เลือก Site...</option></select>
+    <button class="secondary" id="refreshButton" type="button">Refresh</button>
+  </section>
+
+  <section class="list-view" id="listView">
+    <div class="section-head"><h2>Analyzed Sites</h2><span class="count" id="siteCount">0 sites</span></div>
+    <div class="site-grid" id="siteGrid"><div class="loading">Loading sites...</div></div>
+  </section>
+
+  <section class="detail-view" id="detailView">
+    <div class="section-head">
+      <h2 id="detailTitle">Site Detail</h2>
+      <div class="detail-actions">
+        <button class="secondary" id="backButton" type="button">← Back</button>
+        <button class="secondary" id="exportPdfButton" type="button">Export PDF</button>
+        <button class="secondary" id="editSiteButton" type="button">Edit Site</button>
+        <button class="danger" id="deleteSiteButton" type="button">Delete Site</button>
+      </div>
+    </div>
+
+    <section class="card master-section">
+      <div class="master-title customer">Customer Database</div>
+      <div class="info-grid" id="customerInfo"></div>
     </section>
 
-    <section class="list-view" id="listView">
-      <div class="section-head"><h2>All Sites</h2><span class="count" id="siteCount">0 sites</span></div>
-      <div class="site-grid" id="siteGrid"><div class="card loading">Loading sites…</div></div>
+    <section class="card master-section">
+      <div class="master-title current">Site Database (Current)</div>
+      <div class="info-grid" id="currentInfo"></div>
     </section>
 
-    <section class="detail-view" id="detailView">
-      <div class="section-head"><h2>Site Information</h2><div class="detail-actions"><button class="secondary-button" id="editSiteButton" type="button">Edit Site</button><button class="danger-button" id="deleteSiteButton" type="button">Delete Site</button></div></div>
-      <div class="card info-card"><div class="info-grid" id="siteInfo"></div></div>
-
-      <div class="section-head"><h2>Latest Analysis Summary</h2><span class="count" id="latestDate">No analysis</span></div>
-      <div class="summary-grid" id="latestSummary"></div>
-
-      <div class="section-head"><h2>Analysis History</h2><span class="count" id="historyCount">0 results</span></div>
-      <div class="card table-card"><div class="table-wrap">
-        <table><thead><tr><th>Analysis Date</th><th>Average Solar</th><th>Average Usage</th><th>Coverage</th><th>View Analysis</th></tr></thead><tbody id="historyBody"></tbody></table>
-      </div></div>
+    <section class="card master-section">
+      <div class="master-title future">Site Intelligent (Future)</div>
+      <div class="info-grid" id="futureInfo"></div>
     </section>
-  </main>
+
+    <div class="section-head"><h2>Latest Analysis Summary</h2><span class="count" id="latestDate">No analysis</span></div>
+    <div class="summary-grid" id="latestSummary"></div>
+
+    <div class="section-head"><h2>Analysis History</h2><span class="count" id="historyCount">0 results</span></div>
+    <div class="card table-card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Analysis Date</th><th>Average Solar</th><th>Average Usage</th><th>Coverage</th><th>View Analysis</th></tr></thead>
+          <tbody id="historyBody"><tr><td colspan="5" class="empty">No analysis history.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
 </div>
 
-<div class="modal" id="analysisModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+<div class="modal" id="siteModal">
   <div class="modal-card">
-    <div class="modal-head"><h2 id="modalTitle">Stored Analysis Result</h2><button class="close" id="closeModal" type="button" aria-label="Close">×</button></div>
-    <pre class="json" id="jsonPayload"></pre>
-  </div>
-</div>
-
-<div class="modal" id="siteModal" role="dialog" aria-modal="true" aria-labelledby="siteModalTitle">
-  <div class="modal-card">
-    <div class="modal-head"><h2 id="siteModalTitle">Add Site</h2><button class="close" id="closeSiteModal" type="button" aria-label="Close">×</button></div>
+    <div class="modal-head"><h2 id="siteModalTitle">Edit Site</h2><button class="close" id="closeSiteModal" type="button">×</button></div>
     <form id="siteForm">
-      <div class="site-form"><div class="form-grid">
-        <div class="form-field"><label for="formSiteCode">Site Code *</label><input id="formSiteCode" name="site_code" required></div>
-        <div class="form-field"><label for="formCustomerName">Customer Name *</label><input id="formCustomerName" name="customer_name" required></div>
-        <div class="form-field full"><label for="formAddress">Address</label><textarea id="formAddress" name="address"></textarea></div>
-        <div class="form-field"><label for="formTel">Telephone</label><input id="formTel" name="tel" type="tel"></div>
-        <div class="form-field"><label for="formInstallDate">Install Date</label><input id="formInstallDate" name="install_date" type="date"></div>
-        <div class="form-field"><label for="formPanelCurrent">Panel Current *</label><input id="formPanelCurrent" name="panel_current" type="number" min="0" step="1" required></div>
-        <div class="form-field"><label for="formPanelMax">Panel Maximum *</label><input id="formPanelMax" name="panel_max" type="number" min="0" step="1" required></div>
-        <div class="form-field"><label for="formInstalledSize">Installed Size (kWp) *</label><input id="formInstalledSize" name="installed_size_kwp" type="number" min="0" step="0.01" required></div>
-        <div class="form-field"><label for="formBattery">Battery *</label><select id="formBattery" name="battery" required><option value="false">No</option><option value="true">Yes</option></select></div>
-        <div class="form-field"><label for="formBatterySize">Battery Size (kWh)</label><input id="formBatterySize" name="battery_size_kwh" type="number" min="0" step="0.01"></div>
-        <div class="form-field"><label for="formTou">TOU *</label><select id="formTou" name="tou" required><option value="false">No</option><option value="true">Yes</option></select></div>
-        <div class="form-field"><label for="formInverterBrand">Inverter Brand</label><input id="formInverterBrand" name="inverter_brand"></div>
-        <div class="form-field"><label for="formInverterModel">Inverter Model</label><input id="formInverterModel" name="inverter_model"></div>
-        <div class="form-field"><label for="formStatus">Status *</label><input id="formStatus" name="status" value="active" required></div>
+      <div class="form-scroll"><div class="form-grid">
+        <div class="form-section customer">Customer Database</div>
+        <div class="form-field"><label>Site Code *</label><input name="site_code" required placeholder="SITE-1001"></div>
+        <div class="form-field"><label>Site Name</label><input name="site_name" placeholder="SITE-1001-บ้านxxx_xxxx(มบ.xxx)"></div>
+        <div class="form-field"><label>Customer Name</label><input name="customer_name"></div>
+        <div class="form-field"><label>Phone</label><input name="tel"></div>
+        <div class="form-field"><label>Email</label><input name="email" type="email"></div>
+        <div class="form-field"><label>Date of Birth</label><input name="date_of_birth" type="date"></div>
+        <div class="form-field full"><label>Location (Address)</label><textarea name="address"></textarea></div>
+
+        <div class="form-section current">Site Database (Current)</div>
+        <div class="form-field"><label>Installed Date</label><input name="install_date" type="date"></div>
+        <div class="form-field"><label>TOU</label><select name="tou"><option value="false">Not Yet / No</option><option value="true">Yes</option></select></div>
+        <div class="form-field"><label>Status</label><input name="status"></div>
+        <div class="form-field"><label>PV Brand</label><input name="pv_brand"></div>
+        <div class="form-field"><label>PV Size Module (W)</label><input name="pv_size_module_w" type="number" min="0" step="0.01"></div>
+        <div class="form-field"><label>PV Capacity (kWp)</label><input name="installed_size_kwp" type="number" min="0" step="0.01"></div>
+        <div class="form-field"><label>PV QTY Module</label><input name="panel_current" type="number" min="0" step="1"></div>
+        <div class="form-field"><label>Panel Maximum</label><input name="panel_max" type="number" min="0" step="1"></div>
+        <div class="form-field"><label>Inverter Brand</label><input name="inverter_brand"></div>
+        <div class="form-field"><label>Inverter Model</label><input name="inverter_model"></div>
+        <div class="form-field"><label>Inverter Phase</label><input name="inverter_phase"></div>
+        <div class="form-field"><label>Inverter Size (kW)</label><input name="inverter_size_kw" type="number" min="0" step="0.01"></div>
+        <div class="form-field"><label>Battery</label><select name="battery"><option value="false">No</option><option value="true">Yes</option></select></div>
+        <div class="form-field"><label>Battery Brand</label><input name="battery_brand"></div>
+        <div class="form-field"><label>Battery Model</label><input name="battery_model"></div>
+        <div class="form-field"><label>Battery Phase</label><input name="battery_phase"></div>
+        <div class="form-field"><label>Battery Size (kWh)</label><input name="battery_size_kwh" type="number" min="0" step="0.01"></div>
+        <div class="form-field"><label>Backup Brand</label><input name="backup_brand"></div>
+        <div class="form-field"><label>Backup Model</label><input name="backup_model"></div>
+        <div class="form-field"><label>Backup Phase</label><input name="backup_phase"></div>
+        <div class="form-field"><label>Backup Size (amp)</label><input name="backup_size_amp" type="number" min="0" step="0.01"></div>
+
+        <div class="form-section future">Site Intelligent (Future)</div>
+        <div class="form-field"><label>PV Brand</label><input name="intelligent_pv_brand"></div>
+        <div class="form-field"><label>PV Size Module (W)</label><input name="intelligent_pv_size_module_w" type="number" min="0" step="0.01"></div>
+        <div class="form-field"><label>PV Capacity (kWp)</label><input name="intelligent_pv_capacity_kwp" type="number" min="0" step="0.01"></div>
+        <div class="form-field"><label>PV QTY Module</label><input name="intelligent_pv_qty_module" type="number" min="0" step="1"></div>
+        <div class="form-field"><label>Inverter Brand</label><input name="intelligent_inverter_brand"></div>
+        <div class="form-field"><label>Inverter Model</label><input name="intelligent_inverter_model"></div>
+        <div class="form-field"><label>Inverter Phase</label><input name="intelligent_inverter_phase"></div>
+        <div class="form-field"><label>Inverter Size (kW)</label><input name="intelligent_inverter_size_kw" type="number" min="0" step="0.01"></div>
+        <div class="form-field"><label>Battery Brand</label><input name="intelligent_battery_brand"></div>
+        <div class="form-field"><label>Battery Model</label><input name="intelligent_battery_model"></div>
+        <div class="form-field"><label>Battery Phase</label><input name="intelligent_battery_phase"></div>
+        <div class="form-field"><label>Battery Size (kWh)</label><input name="intelligent_battery_size_kwh" type="number" min="0" step="0.01"></div>
+        <div class="form-field"><label>Backup Brand</label><input name="intelligent_backup_brand"></div>
+        <div class="form-field"><label>Backup Model</label><input name="intelligent_backup_model"></div>
+        <div class="form-field"><label>Backup Phase</label><input name="intelligent_backup_phase"></div>
+        <div class="form-field"><label>Backup Size (amp)</label><input name="intelligent_backup_size_amp" type="number" min="0" step="0.01"></div>
       </div></div>
-      <div class="form-error" id="siteFormError" role="alert"></div>
-      <div class="modal-actions"><button class="secondary-button" id="cancelSiteForm" type="button">Cancel</button><button class="primary-button" id="saveSiteButton" type="submit">Save Site</button></div>
+      <div class="form-error" id="siteFormError"></div>
+      <div class="modal-actions"><button class="secondary" id="cancelSiteForm" type="button">Cancel</button><button class="primary" id="saveSiteButton" type="submit">Save Site</button></div>
     </form>
   </div>
 </div>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="toast" id="toast"></div>
 
 <script>
-const API_URL = "https://solar-analyzer-api.onrender.com";
-const $ = id => document.getElementById(id);
-let allSites = [];
-let currentHistory = [];
-let currentSite = null;
-let editingSiteCode = null;
-let toastTimer = null;
+const API_URL="https://solar-analyzer-api.onrender.com";
+const $=id=>document.getElementById(id);
+let allSites=[], analyzedSites=[], currentSite=null, currentHistory=[], editingSiteCode=null, toastTimer=null;
 
-function text(value, fallback = "—") {
-  return value === null || value === undefined || value === "" ? fallback : String(value);
-}
-function escapeHtml(value) {
-  return text(value).replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"})[char]);
-}
-function valueOf(object, ...keys) {
-  for (const key of keys) if (object && object[key] !== null && object[key] !== undefined && object[key] !== "") return object[key];
-  return null;
-}
-function yesNo(value) {
-  if (value === null || value === undefined || value === "") return "—";
-  if (typeof value === "string") return ["true","yes","y","1","with_battery"].includes(value.toLowerCase()) ? "Yes" : "No";
-  return value ? "Yes" : "No";
-}
-function number(value, digits = 2) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed.toFixed(digits) : "—";
-}
-function payloadOf(record) {
-  const payload = record?.result_payload;
-  if (typeof payload !== "string") return payload || {};
-  try { return JSON.parse(payload); } catch { return payload; }
-}
-function analysisDate(record) {
-  const payload = payloadOf(record);
-  const raw = valueOf(record,"created_at","analyzed_at","analysis_date","date") || valueOf(payload?.site,"date_to","date_from");
-  if (!raw) return "—";
-  const date = new Date(raw);
-  return Number.isNaN(date.getTime()) ? text(raw) : date.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
-}
-function apiErrorMessage(detail) {
-  if (Array.isArray(detail)) return detail.map(item => `${item.loc?.at(-1) || "field"}: ${item.msg}`).join("; ");
-  return detail || "Unable to complete the request.";
-}
-async function api(path, options = {}) {
-  const response = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers:{Accept:"application/json",...(options.headers || {})}
-  });
-  let body = null;
-  try { body = await response.json(); } catch {}
-  if (!response.ok) throw new Error(apiErrorMessage(body?.detail));
-  return body;
-}
+function t(v,fallback="—"){return v===null||v===undefined||v===""?fallback:String(v)}
+function esc(v){return t(v,"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function yesNo(v){return v===true?"Yes":v===false?"No":"—"}
+function dateText(raw){if(!raw)return"—";const d=new Date(raw);return Number.isNaN(d.getTime())?t(raw):d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})}
+async function api(path,options={}){const r=await fetch(`${API_URL}${path}`,{...options,headers:{Accept:"application/json",...(options.headers||{})}});let b=null;try{b=await r.json()}catch{}if(!r.ok){const d=b?.detail;if(Array.isArray(d))throw new Error(d.map(x=>`${x.loc?.at(-1)||"field"}: ${x.msg}`).join("; "));throw new Error(d||"Request failed.")}return b}
 
-async function loadSites() {
-  setRefreshing(true);
-  $("siteGrid").innerHTML = '<div class="card loading">Loading sites…</div>';
-  try {
-    const response = await api("/api/sites");
-    allSites = Array.isArray(response) ? response : (response.sites || []);
-    populateDropdown();
+function showToast(msg,error=false){clearTimeout(toastTimer);$("toast").textContent=msg;$("toast").className=`toast visible${error?" error":""}`;toastTimer=setTimeout(()=>$("toast").className="toast",3500)}
+
+async function loadSites(){
+  $("siteGrid").innerHTML='<div class="loading">Loading sites...</div>';
+  try{
+    const data=await api("/api/sites");
+    allSites=data.sites||[];
+    const enriched=await Promise.all(allSites.map(async site=>{
+      try{
+        const h=await api(`/api/sites/${encodeURIComponent(site.site_code)}/history`);
+        return {...site,_history:h.history||[],_historyCount:h.count||0};
+      }catch{return {...site,_history:[],_historyCount:0}}
+    }));
+    analyzedSites=enriched.filter(site=>site._historyCount>0);
+    renderSelect();
     renderSiteList();
-  } catch (error) {
-    $("siteGrid").innerHTML = `<div class="card error">${escapeHtml(error.message)}</div>`;
-    $("siteCount").textContent = "Unavailable";
-  } finally { setRefreshing(false); }
+  }catch(e){$("siteGrid").innerHTML=`<div class="error">${esc(e.message)}</div>`}
 }
-function setRefreshing(active) { $("refreshButton").disabled = active; $("refreshButton").textContent = active ? "Refreshing…" : "↻ Refresh"; }
-function populateDropdown() {
-  const selected = $("siteSelect").value;
-  $("siteSelect").innerHTML = '<option value="">Select Site</option>' + allSites.map(site => {
-    const code = valueOf(site,"site_code") || "";
-    const customer = valueOf(site,"customer_name","customer") || "Unnamed customer";
-    return `<option value="${escapeHtml(code)}">${escapeHtml(code)} — ${escapeHtml(customer)}</option>`;
-  }).join("");
-  if (allSites.some(site => String(site.site_code) === selected)) $("siteSelect").value = selected;
+function renderSelect(){
+  const current=$("siteSelect").value;
+  $("siteSelect").innerHTML='<option value="">เลือก Site...</option>'+analyzedSites.map(s=>`<option value="${esc(s.site_code)}">${esc(s.site_code)}${s.site_name?` - ${esc(s.site_name)}`:""}</option>`).join("");
+  if(analyzedSites.some(s=>s.site_code===current))$("siteSelect").value=current;
 }
-function filteredSites() {
-  const query = $("searchInput").value.trim().toLowerCase();
-  if (!query) return allSites;
-  return allSites.filter(site => [valueOf(site,"site_code"),valueOf(site,"customer_name","customer")].some(value => String(value || "").toLowerCase().includes(query)));
-}
-function renderSiteList() {
-  const sites = filteredSites();
-  $("siteCount").textContent = `${sites.length} ${sites.length === 1 ? "site" : "sites"}`;
-  if (!sites.length) { $("siteGrid").innerHTML = '<div class="card empty">No matching sites found.</div>'; return; }
-  $("siteGrid").innerHTML = sites.map(site => {
-    const code = valueOf(site,"site_code") || "";
+function renderSiteList(){
+  const q=$("searchInput").value.trim().toLowerCase();
+  const sites=analyzedSites.filter(s=>[s.site_code,s.site_name,s.customer_name].some(v=>String(v||"").toLowerCase().includes(q)));
+  $("siteCount").textContent=`${sites.length} sites`;
+  if(!sites.length){$("siteGrid").innerHTML='<div class="empty">ยังไม่มี Site ที่มี Analysis History</div>';return}
+  $("siteGrid").innerHTML=sites.map(s=>{
+    const latest=s._history?.[0];
     return `<article class="card site-card">
-      <span class="site-code">${escapeHtml(code)}</span>
-      <h3>${escapeHtml(valueOf(site,"customer_name","customer"))}</h3>
-      <p class="address">${escapeHtml(valueOf(site,"address"))}</p>
-      <div class="site-facts">
-        <div class="fact"><span>Installed Size</span><b>${number(valueOf(site,"installed_size_kwp","installed_size"))} kWp</b></div>
-        <div class="fact"><span>Battery</span><b>${yesNo(valueOf(site,"battery","has_battery"))}</b></div>
-        <div class="fact"><span>TOU</span><b>${yesNo(valueOf(site,"tou","is_tou"))}</b></div>
-        <div class="fact"><span>Last Analysis</span><b data-last-analysis="${escapeHtml(code)}">Loading…</b></div>
+      <span class="site-code">${esc(s.site_code)}</span>
+      <h3>${esc(s.site_name||s.customer_name||s.site_code)}</h3>
+      <p>${esc(s.address||"No address")}</p>
+      <div class="facts">
+        <div class="fact"><span>Installed Size</span><b>${esc(t(s.installed_size_kwp))} kWp</b></div>
+        <div class="fact"><span>Analyses</span><b>${s._historyCount}</b></div>
+        <div class="fact"><span>Panel Current</span><b>${esc(t(s.panel_current))}</b></div>
+        <div class="fact"><span>Last Analysis</span><b>${dateText(latest?.analysis_date)}</b></div>
       </div>
       <div class="card-actions">
-        <button class="card-action" type="button" data-card-action="view" data-site-code="${escapeHtml(code)}">View Details</button>
-        <button class="card-action edit" type="button" data-card-action="edit" data-site-code="${escapeHtml(code)}">Edit</button>
-        <button class="card-action delete" type="button" data-card-action="delete" data-site-code="${escapeHtml(code)}" aria-label="Delete ${escapeHtml(code)}">Delete</button>
+        <button class="primary" data-view="${esc(s.site_code)}" type="button">View Details</button>
+        <button class="secondary" data-edit="${esc(s.site_code)}" type="button">Edit</button>
       </div>
-    </article>`;
+    </article>`
   }).join("");
-  document.querySelectorAll("[data-card-action]").forEach(button => button.addEventListener("click",() => {
-    const site = allSites.find(item => String(item.site_code) === button.dataset.siteCode);
-    if (button.dataset.cardAction === "view") selectSite(button.dataset.siteCode);
-    if (button.dataset.cardAction === "edit" && site) openSiteModal("edit",site);
-    if (button.dataset.cardAction === "delete") deleteSite(button.dataset.siteCode);
-  }));
-  loadCardDates(sites);
-}
-async function loadCardDates(sites) {
-  await Promise.allSettled(sites.map(async site => {
-    const code = valueOf(site,"site_code");
-    const target = [...document.querySelectorAll("[data-last-analysis]")].find(node => node.dataset.lastAnalysis === String(code));
-    if (!target) return;
-    try { const response = await api(`/api/sites/${encodeURIComponent(code)}/latest`); target.textContent = response.latest ? analysisDate(response.latest) : "No analysis"; }
-    catch { target.textContent = "Unavailable"; }
-  }));
+  document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>selectSite(b.dataset.view));
+  document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{const s=allSites.find(x=>x.site_code===b.dataset.edit);if(s)openSiteModal("edit",s)});
 }
 
-async function selectSite(siteCode) {
-  $("siteSelect").value = siteCode;
-  if (!siteCode) { showList(); return; }
-  $("listView").classList.add("hidden");
-  $("detailView").classList.add("visible");
-  $("siteInfo").innerHTML = '<div class="loading">Loading site…</div>';
-  $("latestSummary").innerHTML = '<div class="card loading">Loading latest analysis…</div>';
-  $("historyBody").innerHTML = '<tr><td colspan="5" class="loading">Loading history…</td></tr>';
-  try {
-    const code = encodeURIComponent(siteCode);
-    const [siteResponse, latestResponse, historyResponse] = await Promise.all([api(`/api/sites/${code}`),api(`/api/sites/${code}/latest`),api(`/api/sites/${code}/history`)]);
-    currentSite = siteResponse.site || siteResponse;
-    renderSiteInfo(currentSite);
-    renderLatest(latestResponse.latest || null);
-    currentHistory = historyResponse.history || [];
-    renderHistory(currentHistory);
-  } catch (error) {
-    $("siteInfo").innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
-    $("latestSummary").innerHTML = "";
-    $("historyBody").innerHTML = '<tr><td colspan="5" class="error">Unable to load this site.</td></tr>';
-  }
-}
-function showList() { currentSite=null; $("detailView").classList.remove("visible"); $("listView").classList.remove("hidden"); }
-function renderSiteInfo(site) {
-  const fields = [
-    ["Site Code",valueOf(site,"site_code")],["Customer",valueOf(site,"customer_name","customer")],["Address",valueOf(site,"address")],["Telephone",valueOf(site,"tel")],
-    ["Installed Size",`${number(valueOf(site,"installed_size_kwp","installed_size"))} kWp`],["Panel Current",valueOf(site,"panel_current","current_panel_count")],["Panel Maximum",valueOf(site,"panel_max")],["Battery",yesNo(valueOf(site,"battery","has_battery"))],
-    ["Install Date",valueOf(site,"install_date")],
-    ["Battery Size",valueOf(site,"battery_size","battery_size_kwh")],["TOU",yesNo(valueOf(site,"tou","is_tou"))],["Inverter Brand",valueOf(site,"inverter_brand")],["Inverter Model",valueOf(site,"inverter_model")],["Status",valueOf(site,"status")]
-  ];
-  $("siteInfo").innerHTML = fields.map(([label,value]) => `<div class="info-item"><span>${label}</span><b${label === "Status" ? ' class="status"' : ""}>${escapeHtml(value)}</b></div>`).join("");
-}
-function renderLatest(latest) {
-  if (!latest) { $("latestDate").textContent = "No analysis"; $("latestSummary").innerHTML = '<div class="card empty">No analysis results are available for this site.</div>'; return; }
-  $("latestDate").textContent = analysisDate(latest);
-  const cards = [
-    ["Average Solar",`${number(latest.average_solar_kwh)} kWh/day`,""],
-    ["Average Usage",`${number(latest.average_usage_kwh)} kWh/day`,""],
-    ["Solar Coverage",`${number(latest.daytime_coverage_percent,1)}%`,""],
-    ["Recommendation",text(latest.recommendation),"recommendation"]
-  ];
-  $("latestSummary").innerHTML = cards.map(([label,value,className]) => `<div class="card metric ${className}"><div class="metric-label">${label}</div><div class="metric-value">${escapeHtml(value)}</div></div>`).join("");
-}
-function renderHistory(history) {
-  $("historyCount").textContent = `${history.length} ${history.length === 1 ? "result" : "results"}`;
-  if (!history.length) { $("historyBody").innerHTML = '<tr><td colspan="5" class="empty">No analysis history found.</td></tr>'; return; }
-  $("historyBody").innerHTML = history.map((item,index) => `<tr>
-    <td>${escapeHtml(analysisDate(item))}</td><td>${number(item.average_solar_kwh)} kWh/day</td><td>${number(item.average_usage_kwh)} kWh/day</td><td>${number(item.daytime_coverage_percent,1)}%</td>
-    <td><button class="view-button" type="button" data-history-index="${index}">View Analysis</button></td></tr>`).join("");
-  document.querySelectorAll("[data-history-index]").forEach(button => button.addEventListener("click",() => openAnalysis(Number(button.dataset.historyIndex))));
-}
-function openAnalysis(index) {
-  const payload = payloadOf(currentHistory[index]);
-  $("jsonPayload").textContent = typeof payload === "string" ? payload : JSON.stringify(payload,null,2);
-  $("analysisModal").classList.add("open");
-  $("closeModal").focus();
-}
-function closeModal() { $("analysisModal").classList.remove("open"); }
+function infoItem(label,value,unit=""){return `<div class="info-item"><span>${label}</span><b>${esc(t(value))}${value!==null&&value!==undefined&&value!==""&&unit?` ${unit}`:""}</b></div>`}
+function renderMasterData(site){
+  $("customerInfo").innerHTML=[
+    ["Site Code",site.site_code],["Site Name",site.site_name],["Customer Name",site.customer_name],["Phone",site.tel],
+    ["Email",site.email],["Location (Address)",site.address],["Date of Birth",dateText(site.date_of_birth)]
+  ].map(([l,v])=>infoItem(l,v)).join("");
 
-function setField(name,value) {
-  const field = $("siteForm").elements[name];
-  if (!field || value === undefined) return;
-  if (typeof value === "boolean") field.value = String(value);
-  else field.value = value ?? "";
+  $("currentInfo").innerHTML=[
+    ["Installed Date",dateText(site.install_date),""],["TOU",yesNo(site.tou),""],["Status",site.status,""],
+    ["PV Brand",site.pv_brand,"Tier1"],["PV Size Module",site.pv_size_module_w,"W."],["PV Capacity",site.installed_size_kwp,"kWp"],["PV QTY Module",site.panel_current,"Module"],
+    ["Inverter Brand",site.inverter_brand,""],["Inverter Model",site.inverter_model,""],["Inverter Phase",site.inverter_phase,"Phase"],["Inverter Size",site.inverter_size_kw,"kW."],
+    ["Battery Brand",site.battery_brand,""],["Battery Model",site.battery_model,""],["Battery Phase",site.battery_phase,"Phase"],["Battery Size",site.battery_size_kwh,"kWh."],
+    ["Backup Brand",site.backup_brand,""],["Backup Model",site.backup_model,""],["Backup Phase",site.backup_phase,"Phase"],["Backup Size",site.backup_size_amp,"amp."]
+  ].map(([l,v,u])=>infoItem(l,v,u)).join("");
+
+  $("futureInfo").innerHTML=[
+    ["PV Brand",site.intelligent_pv_brand,"Tier1"],["PV Size Module",site.intelligent_pv_size_module_w,"W."],["PV Capacity",site.intelligent_pv_capacity_kwp,"kWp."],["PV QTY Module",site.intelligent_pv_qty_module,"Module"],
+    ["Inverter Brand",site.intelligent_inverter_brand,""],["Inverter Model",site.intelligent_inverter_model,""],["Inverter Phase",site.intelligent_inverter_phase,"Phase"],["Inverter Size",site.intelligent_inverter_size_kw,"kW."],
+    ["Battery Brand",site.intelligent_battery_brand,""],["Battery Model",site.intelligent_battery_model,""],["Battery Phase",site.intelligent_battery_phase,"Phase"],["Battery Size",site.intelligent_battery_size_kwh,"kWh."],
+    ["Backup Brand",site.intelligent_backup_brand,""],["Backup Model",site.intelligent_backup_model,""],["Backup Phase",site.intelligent_backup_phase,"Phase"],["Backup Size",site.intelligent_backup_size_amp,"amp."]
+  ].map(([l,v,u])=>infoItem(l,v,u)).join("");
 }
-function openSiteModal(mode, site = {}) {
-  editingSiteCode = mode === "edit" ? site.site_code : null;
-  $("siteModalTitle").textContent = mode === "edit" ? `Edit Site ${text(site.site_code,"")}` : "Add Site";
-  $("saveSiteButton").textContent = mode === "edit" ? "Update Site" : "Create Site";
+function renderLatest(latest){
+  $("latestDate").textContent=latest?dateText(latest.analysis_date):"No analysis";
+  if(!latest){$("latestSummary").innerHTML='<div class="card empty">No analysis.</div>';return}
+  $("latestSummary").innerHTML=[
+    ["Average Solar",latest.average_solar_kwh,"kWh/day"],["Average Usage",latest.average_usage_kwh,"kWh/day"],
+    ["Solar Coverage",latest.daytime_coverage_percent,"%"],["Recommendation",latest.recommendation||"—",""]
+  ].map(([l,v,u])=>`<div class="card metric"><span>${l}</span><b>${esc(t(v))}${u?` ${u}`:""}</b></div>`).join("");
+}
+function renderHistory(history){
+  $("historyCount").textContent=`${history.length} results`;
+  if(!history.length){$("historyBody").innerHTML='<tr><td colspan="5" class="empty">No analysis history.</td></tr>';return}
+  $("historyBody").innerHTML=history.map((h,i)=>`<tr>
+    <td>${dateText(h.analysis_date)}</td><td>${esc(t(h.average_solar_kwh))} kWh/day</td>
+    <td>${esc(t(h.average_usage_kwh))} kWh/day</td><td>${esc(t(h.daytime_coverage_percent))}%</td>
+    <td><button class="view-analysis" data-history-index="${i}" type="button">View Analysis</button></td>
+  </tr>`).join("");
+  document.querySelectorAll("[data-history-index]").forEach(b=>b.onclick=()=>openAnalysis(Number(b.dataset.historyIndex)));
+}
+function openAnalysis(index){
+  const item=currentHistory[index];
+  if(!item?.result_payload){showToast("Analysis นี้ไม่มี result_payload",true);return}
+  sessionStorage.setItem("solarHistoryResult",JSON.stringify({
+    site:currentSite,history:item,result:item.result_payload
+  }));
+  location.href="index.html?history=1";
+}
+async function selectSite(code){
+  if(!code)return showList();
+  try{
+    const [s,h]=await Promise.all([
+      api(`/api/sites/${encodeURIComponent(code)}`),
+      api(`/api/sites/${encodeURIComponent(code)}/history`)
+    ]);
+    currentSite=s.site||s;currentHistory=h.history||[];
+    $("detailTitle").textContent=`${currentSite.site_code} — ${currentSite.site_name||currentSite.customer_name||"Site Detail"}`;
+    renderMasterData(currentSite);renderLatest(currentHistory[0]||null);renderHistory(currentHistory);
+    $("listView").classList.add("hidden");$("detailView").classList.add("visible");window.scrollTo({top:0,behavior:"smooth"});
+  }catch(e){showToast(e.message,true)}
+}
+function showList(){currentSite=null;currentHistory=[];$("detailView").classList.remove("visible");$("listView").classList.remove("hidden");$("siteSelect").value=""}
+
+const fields=[
+"site_code","site_name","customer_name","tel","email","date_of_birth","address","install_date","tou","status",
+"pv_brand","pv_size_module_w","installed_size_kwp","panel_current","panel_max","inverter_brand","inverter_model","inverter_phase","inverter_size_kw",
+"battery","battery_brand","battery_model","battery_phase","battery_size_kwh","backup_brand","backup_model","backup_phase","backup_size_amp",
+"intelligent_pv_brand","intelligent_pv_size_module_w","intelligent_pv_capacity_kwp","intelligent_pv_qty_module",
+"intelligent_inverter_brand","intelligent_inverter_model","intelligent_inverter_phase","intelligent_inverter_size_kw",
+"intelligent_battery_brand","intelligent_battery_model","intelligent_battery_phase","intelligent_battery_size_kwh",
+"intelligent_backup_brand","intelligent_backup_model","intelligent_backup_phase","intelligent_backup_size_amp"
+];
+function openSiteModal(mode,site={}){
+  editingSiteCode=mode==="edit"?site.site_code:null;
+  $("siteModalTitle").textContent=mode==="edit"?`Edit ${site.site_code}`:"Add Site";
   $("siteForm").reset();
-  $("formPanelCurrent").value = 0;
-  $("formPanelMax").value = 0;
-  $("formInstalledSize").value = 0;
-  $("formStatus").value = "active";
-  ["site_code","customer_name","address","tel","panel_current","panel_max","battery","install_date","tou","installed_size_kwp","battery_size_kwh","inverter_brand","inverter_model","status"].forEach(name => setField(name,site[name]));
-  showFormError("");
-  $("siteModal").classList.add("open");
-  $("formSiteCode").focus();
+  fields.forEach(name=>{const el=$("siteForm").elements[name];if(!el)return;const v=site[name];if(typeof v==="boolean")el.value=String(v);else el.value=v??""});
+  if(mode==="add"){$("siteForm").elements.status.value="Active";$("siteForm").elements.tou.value="false";$("siteForm").elements.battery.value="false"}
+  $("siteFormError").classList.remove("visible");$("siteModal").classList.add("open");
 }
-function closeSiteModal() {
-  if ($("saveSiteButton").disabled) return;
-  $("siteModal").classList.remove("open");
-  editingSiteCode = null;
+function closeSiteModal(){if(!$("saveSiteButton").disabled){$("siteModal").classList.remove("open");editingSiteCode=null}}
+function payloadFromForm(){
+  const fd=new FormData($("siteForm"));const p={};
+  fields.forEach(name=>{
+    const el=$("siteForm").elements[name];if(!el)return;const raw=fd.get(name);
+    if(["tou","battery"].includes(name)){p[name]=raw==="true";return}
+    if(["pv_size_module_w","installed_size_kwp","panel_current","panel_max","inverter_size_kw","battery_size_kwh","backup_size_amp",
+      "intelligent_pv_size_module_w","intelligent_pv_capacity_kwp","intelligent_pv_qty_module","intelligent_inverter_size_kw",
+      "intelligent_battery_size_kwh","intelligent_backup_size_amp"].includes(name)){if(raw!=="")p[name]=Number(raw);return}
+    if(["install_date","date_of_birth"].includes(name)){if(raw)p[name]=raw;return}
+    if(String(raw||"").trim()!=="")p[name]=String(raw).trim();
+  });
+  if(!p.site_code)throw new Error("Site Code is required.");
+  return p;
 }
-function showFormError(message) {
-  $("siteFormError").textContent = message;
-  $("siteFormError").classList.toggle("visible",Boolean(message));
+async function saveSite(e){
+  e.preventDefault();$("siteFormError").classList.remove("visible");
+  try{
+    const payload=payloadFromForm();const old=editingSiteCode;const path=old?`/api/sites/${encodeURIComponent(old)}`:"/api/sites";
+    $("saveSiteButton").disabled=true;
+    const r=await api(path,{method:old?"PUT":"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const saved=r.site?.site_code||payload.site_code;closeSiteModal();showToast(`Site ${saved} saved.`);await loadSites();if(old)await selectSite(saved);
+  }catch(err){$("siteFormError").textContent=err.message;$("siteFormError").classList.add("visible")}
+  finally{$("saveSiteButton").disabled=false}
 }
-function sitePayload() {
-  const form = $("siteForm");
-  if (!form.checkValidity()) { form.reportValidity(); throw new Error("Please complete all required fields."); }
-  const values = new FormData(form);
-  const panelCurrent = Number(values.get("panel_current"));
-  const panelMax = Number(values.get("panel_max"));
-  if (panelCurrent > panelMax) throw new Error("Panel Current cannot exceed Panel Maximum.");
-  return {
-    site_code:String(values.get("site_code")).trim(),
-    customer_name:String(values.get("customer_name")).trim(),
-    address:String(values.get("address") || "").trim(),
-    tel:String(values.get("tel") || "").trim(),
-    panel_current:panelCurrent,
-    panel_max:panelMax,
-    battery:values.get("battery") === "true",
-    install_date:values.get("install_date") || null,
-    tou:values.get("tou") === "true",
-    installed_size_kwp:Number(values.get("installed_size_kwp")),
-    battery_size_kwh:values.get("battery_size_kwh") === "" ? null : Number(values.get("battery_size_kwh")),
-    inverter_brand:String(values.get("inverter_brand") || "").trim(),
-    inverter_model:String(values.get("inverter_model") || "").trim(),
-    status:String(values.get("status")).trim()
-  };
-}
-async function saveSite(event) {
-  event.preventDefault();
-  showFormError("");
-  let payload;
-  try { payload = sitePayload(); } catch(error) { showFormError(error.message); return; }
-  const originalCode = editingSiteCode;
-  const method = originalCode ? "PUT" : "POST";
-  const path = originalCode ? `/api/sites/${encodeURIComponent(originalCode)}` : "/api/sites";
-  $("saveSiteButton").disabled = true;
-  $("cancelSiteForm").disabled = true;
-  $("saveSiteButton").textContent = originalCode ? "Updating…" : "Creating…";
-  try {
-    const response = await api(path,{method,headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-    const savedCode = response.site?.site_code || payload.site_code;
-    $("siteModal").classList.remove("open");
-    editingSiteCode = null;
-    showToast(originalCode ? `Site ${savedCode} updated successfully.` : `Site ${savedCode} created successfully.`);
-    await loadSites();
-    if (originalCode && currentSite) await selectSite(savedCode);
-    else { $("siteSelect").value=""; showList(); }
-  } catch(error) { showFormError(error.message); }
-  finally {
-    $("saveSiteButton").disabled = false;
-    $("cancelSiteForm").disabled = false;
-    $("saveSiteButton").textContent = editingSiteCode ? "Update Site" : "Save Site";
-  }
-}
-async function deleteSite(siteCode) {
-  if (!siteCode || !confirm(`Delete site ${siteCode}?\n\nThis action cannot be undone.`)) return;
-  try {
-    await api(`/api/sites/${encodeURIComponent(siteCode)}`,{method:"DELETE"});
-    $("siteSelect").value = "";
-    showList();
-    showToast(`Site ${siteCode} deleted successfully.`);
-    await loadSites();
-  } catch(error) { showToast(error.message,true); }
-}
-function showToast(message,isError=false) {
-  clearTimeout(toastTimer);
-  $("toast").textContent = message;
-  $("toast").className = `toast visible${isError ? " error-toast" : ""}`;
-  toastTimer = setTimeout(() => { $("toast").className="toast"; },4000);
+async function deleteCurrent(){
+  if(!currentSite||!confirm(`Delete ${currentSite.site_code}?`))return;
+  try{await api(`/api/sites/${encodeURIComponent(currentSite.site_code)}`,{method:"DELETE"});showToast("Site deleted.");showList();await loadSites()}catch(e){showToast(e.message,true)}
 }
 
-$("searchInput").addEventListener("input",renderSiteList);
-$("siteSelect").addEventListener("change",event => selectSite(event.target.value));
-$("refreshButton").addEventListener("click",async() => { const selected=$("siteSelect").value; await loadSites(); if(selected) await selectSite(selected); });
-$("addSiteButton").addEventListener("click",() => openSiteModal("add"));
-$("editSiteButton").addEventListener("click",() => { if(currentSite) openSiteModal("edit",currentSite); });
-$("deleteSiteButton").addEventListener("click",() => { if(currentSite) deleteSite(currentSite.site_code); });
-$("siteForm").addEventListener("submit",saveSite);
-$("closeSiteModal").addEventListener("click",closeSiteModal);
-$("cancelSiteForm").addEventListener("click",closeSiteModal);
-$("siteModal").addEventListener("click",event => { if(event.target === $("siteModal")) closeSiteModal(); });
-$("closeModal").addEventListener("click",closeModal);
-$("analysisModal").addEventListener("click",event => { if(event.target === $("analysisModal")) closeModal(); });
-document.addEventListener("keydown",event => { if(event.key === "Escape") { closeModal(); closeSiteModal(); } });
+$("searchInput").oninput=renderSiteList;
+$("siteSelect").onchange=e=>selectSite(e.target.value);
+$("refreshButton").onclick=loadSites;
+$("addSiteButton").onclick=()=>openSiteModal("add");
+$("backButton").onclick=showList;
+$("exportPdfButton").onclick=()=>window.print();
+$("editSiteButton").onclick=()=>currentSite&&openSiteModal("edit",currentSite);
+$("deleteSiteButton").onclick=deleteCurrent;
+$("siteForm").onsubmit=saveSite;
+$("closeSiteModal").onclick=closeSiteModal;$("cancelSiteForm").onclick=closeSiteModal;
+$("siteModal").onclick=e=>{if(e.target===$("siteModal"))closeSiteModal()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSiteModal()});
 loadSites();
 </script>
 </body>
