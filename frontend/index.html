@@ -131,6 +131,59 @@ h1{max-width:760px;font-size:38px}
 .day-note{color:#0b8a61;font-weight:700}.night-note{color:#245ca8;font-weight:700}
 @media(max-width:900px){.site-form{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.site-form{grid-template-columns:1fr}}
+
+/* Add Site quick-create */
+.site-select-wrap{display:flex;gap:8px;align-items:stretch}
+.site-select-wrap select{flex:1;min-width:0}
+.add-site-inline{flex:0 0 auto;border:1px solid var(--green);background:var(--green2);color:var(--green);border-radius:12px;padding:0 14px;font-size:14px;font-weight:800;box-shadow:none}
+.add-site-inline:hover{background:#dcf3ea}
+
+.site-modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(7,36,61,.62)}
+.site-modal.open{display:flex}
+.site-modal-card{width:min(920px,100%);max-height:90vh;display:flex;flex-direction:column;background:#fff;border-radius:20px;box-shadow:0 24px 70px rgba(7,36,61,.32);overflow:hidden}
+.site-modal-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 22px;border-bottom:1px solid var(--line)}
+.site-modal-head h2{margin:0;font-size:22px}
+.site-modal-close{width:40px;height:40px;border:0;border-radius:11px;background:#eef3f7;color:var(--text);padding:0;font-size:24px;box-shadow:none}
+.site-create-form{padding:20px 22px;overflow:auto}
+.site-create-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.site-create-field.full{grid-column:1/-1}
+.site-create-field label{display:block;font-size:13px;font-weight:800;margin-bottom:6px}
+.site-create-field input,.site-create-field select,.site-create-field textarea{width:100%;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--text);padding:11px 12px;outline:none}
+.site-create-field textarea{min-height:76px;resize:vertical}
+.site-create-field input:focus,.site-create-field select:focus,.site-create-field textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(20,150,111,.12)}
+.site-create-error{display:none;margin:0 22px 14px;padding:11px 13px;border-radius:10px;background:#fff2f0;color:#b42318;font-size:14px}
+.site-create-error.visible{display:block}
+.site-modal-actions{display:flex;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid var(--line)}
+.site-modal-actions button{padding:12px 18px;border-radius:12px;font-size:15px;box-shadow:none}
+.site-modal-actions button:disabled{opacity:.6;cursor:wait}
+.site-create-hint{margin-top:8px;color:var(--muted);font-size:12px;line-height:1.5}
+@media(max-width:700px){
+  .site-select-wrap{flex-direction:column}
+  .add-site-inline{height:44px}
+  .site-create-grid{grid-template-columns:1fr}
+  .site-create-field.full{grid-column:auto}
+}
+
+
+/* V2 Site selector + master data form */
+.site-combobox{display:flex;gap:8px;align-items:stretch}
+.site-combobox input{flex:1;min-width:0}
+.site-combobox .add-site-inline{height:auto}
+.field-help{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.45}
+.section-divider{grid-column:1/-1;margin:6px 0 0;padding:10px 12px;border-radius:10px;background:#f4f8fb;border:1px solid var(--line);font-weight:800;color:var(--navy)}
+.section-divider.customer{background:#fff4f1;border-color:#ffd8ce;color:#a53a1e}
+.section-divider.current{background:#eef8ef;border-color:#cfe7d3;color:#24703a}
+.section-divider.future{background:#fff0fb;border-color:#efd1e8;color:#8a2c72}
+.print-button{border:1px solid var(--blue);background:#fff;color:var(--blue);padding:14px 18px;border-radius:14px;font-size:15px;font-weight:800;box-shadow:none}
+@media print{
+  .sidebar,.empty-state,.loading-state,.actions,.file-label,.print-button{display:none!important}
+  .app{display:block!important}
+  main{padding:0!important}
+  body{background:#fff!important}
+  .card{box-shadow:none!important}
+  .dashboard-content{display:block!important}
+}
+
 </style>
 </head>
 <body>
@@ -164,6 +217,7 @@ h1{max-width:760px;font-size:38px}
       <div id="columnWarning" style="display:none;margin-top:10px;padding:10px 12px;border-radius:10px;background:#eef7ff;border:1px solid #c9def2;color:#315d80;font-size:13px;line-height:1.55"></div>
     </div>
     <div class="actions" id="headerActions" style="display:none">
+      <button class="print-button" id="exportDashboardPdf" type="button">Export PDF</button>
       <label class="file-label primary" for="fileInput">⇧ Upload CSV / Excel</label>
     </div>
   </div>
@@ -177,9 +231,23 @@ h1{max-width:760px;font-size:38px}
       <p>ระบบจะอ่านข้อมูลรายชั่วโมง แบ่งช่วงเวลา 09:00–16:00, 16:00–22:00 และ 22:00–09:00 แล้ววิเคราะห์ผลตามสูตรที่กำหนดไว้ในเว็บ</p>
       
       <div class="site-form">
-        <div class="site-field"><label for="siteSelect">เลือก Site</label><select id="siteSelect"><option value="">กำลังโหลด Site...</option></select></div>
-        <div class="site-field"><label for="installedSize">ขนาดติดตั้ง (kWp)</label><input id="installedSize" type="text" readonly placeholder="เลือก Site ก่อน"></div>
-        <div class="site-field"><label for="panelCountInput">จำนวนแผงปัจจุบัน</label><input id="panelCountInput" type="text" readonly placeholder="เลือก Site ก่อน"></div>
+        <div class="site-field">
+          <label for="siteInput">Site</label>
+          <div class="site-combobox">
+            <input id="siteInput" list="siteOptions" type="text" autocomplete="off" placeholder="พิมพ์ Site ใหม่ หรือเลือก Site เดิม">
+            <datalist id="siteOptions"></datalist>
+            <button class="add-site-inline" id="addSiteInlineButton" type="button">+ Add Site</button>
+          </div>
+          <div class="field-help">พิมพ์ Site Code ใหม่ได้ หรือเลือก Site ที่มีอยู่จากรายการ</div>
+        </div>
+        <div class="site-field">
+          <label for="installedSize">ขนาดติดตั้ง (kWp)</label>
+          <input id="installedSize" type="number" min="0" step="0.01" placeholder="เช่น 10.00">
+        </div>
+        <div class="site-field">
+          <label for="panelCountInput">จำนวนแผงปัจจุบัน</label>
+          <input id="panelCountInput" type="number" min="0" step="1" placeholder="เช่น 16">
+        </div>
       </div>
       <div class="drop-zone" id="dropZone">
         <div style="font-size:38px;margin-bottom:10px">⇧</div>
@@ -250,6 +318,234 @@ h1{max-width:760px;font-size:38px}
 </div></main>
 </div>
 
+
+<div class="site-modal" id="siteCreateModal" role="dialog" aria-modal="true" aria-labelledby="siteCreateTitle">
+  <div class="site-modal-card">
+    <div class="site-modal-head">
+      <div>
+        <h2 id="siteCreateTitle">เพิ่ม Site ใหม่</h2>
+        <div style="color:var(--muted);font-size:13px;margin-top:4px">ข้อมูลจะถูกบันทึกเข้า Supabase ผ่าน Backend API</div>
+      </div>
+      <button class="site-modal-close" id="closeSiteCreateModal" type="button" aria-label="Close">×</button>
+    </div>
+
+    <form id="siteCreateForm">
+      <div class="site-create-form">
+        <div class="site-create-grid">
+
+          <div class="section-divider customer">Customer Database</div>
+
+          <div class="site-create-field">
+            <label for="newSiteCode">Site Code *</label>
+            <input id="newSiteCode" name="site_code" required placeholder="เช่น SITE002">
+          </div>
+          <div class="site-create-field">
+            <label for="newSiteName">Site Name</label>
+            <input id="newSiteName" name="site_name" placeholder="เช่น บ้านคุณสมชาย">
+          </div>
+          <div class="site-create-field">
+            <label for="newCustomerName">Customer Name</label>
+            <input id="newCustomerName" name="customer_name" placeholder="ชื่อลูกค้า">
+          </div>
+          <div class="site-create-field">
+            <label for="newTel">Phone</label>
+            <input id="newTel" name="tel" placeholder="เช่น 0812345678">
+          </div>
+          <div class="site-create-field">
+            <label for="newEmail">Email</label>
+            <input id="newEmail" name="email" type="email" placeholder="name@example.com">
+          </div>
+          <div class="site-create-field">
+            <label for="newDateOfBirth">Date of Birth</label>
+            <input id="newDateOfBirth" name="date_of_birth" type="date">
+          </div>
+          <div class="site-create-field full">
+            <label for="newAddress">Location (Address)</label>
+            <textarea id="newAddress" name="address" placeholder="ที่อยู่ Site"></textarea>
+          </div>
+
+          <div class="section-divider current">Site Database (Current)</div>
+
+          <div class="site-create-field">
+            <label for="newInstallDate">Installed Date</label>
+            <input id="newInstallDate" name="install_date" type="date">
+          </div>
+          <div class="site-create-field">
+            <label for="newTou">TOU</label>
+            <select id="newTou" name="tou">
+              <option value="false">Not Yet / No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+          <div class="site-create-field">
+            <label for="newStatus">Status</label>
+            <select id="newStatus" name="status">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="site-create-field">
+            <label for="newPvBrand">PV Brand</label>
+            <input id="newPvBrand" name="pv_brand">
+          </div>
+          <div class="site-create-field">
+            <label for="newPvSizeModule">PV Size Module (W)</label>
+            <input id="newPvSizeModule" name="pv_size_module_w" type="number" min="0" step="0.01">
+          </div>
+          <div class="site-create-field">
+            <label for="newInstalledSize">PV Capacity / Installed Size (kWp) *</label>
+            <input id="newInstalledSize" name="installed_size_kwp" type="number" min="0" step="0.01" required>
+          </div>
+          <div class="site-create-field">
+            <label for="newPanelCurrent">PV QTY Module / Panel Current *</label>
+            <input id="newPanelCurrent" name="panel_current" type="number" min="0" step="1" required>
+          </div>
+          <div class="site-create-field">
+            <label for="newPanelMax">Panel Maximum</label>
+            <input id="newPanelMax" name="panel_max" type="number" min="0" step="1">
+          </div>
+
+          <div class="site-create-field">
+            <label for="newInverterBrand">Inverter Brand</label>
+            <input id="newInverterBrand" name="inverter_brand">
+          </div>
+          <div class="site-create-field">
+            <label for="newInverterModel">Inverter Model</label>
+            <input id="newInverterModel" name="inverter_model">
+          </div>
+          <div class="site-create-field">
+            <label for="newInverterPhase">Inverter Phase</label>
+            <input id="newInverterPhase" name="inverter_phase">
+          </div>
+          <div class="site-create-field">
+            <label for="newInverterSize">Inverter Size (kW)</label>
+            <input id="newInverterSize" name="inverter_size_kw" type="number" min="0" step="0.01">
+          </div>
+
+          <div class="site-create-field">
+            <label for="newBattery">Battery</label>
+            <select id="newBattery" name="battery">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+          <div class="site-create-field">
+            <label for="newBatteryBrand">Battery Brand</label>
+            <input id="newBatteryBrand" name="battery_brand">
+          </div>
+          <div class="site-create-field">
+            <label for="newBatteryModel">Battery Model</label>
+            <input id="newBatteryModel" name="battery_model">
+          </div>
+          <div class="site-create-field">
+            <label for="newBatteryPhase">Battery Phase</label>
+            <input id="newBatteryPhase" name="battery_phase">
+          </div>
+          <div class="site-create-field">
+            <label for="newBatterySize">Battery Size (kWh)</label>
+            <input id="newBatterySize" name="battery_size_kwh" type="number" min="0" step="0.01">
+          </div>
+
+          <div class="site-create-field">
+            <label for="newBackupBrand">Backup Brand</label>
+            <input id="newBackupBrand" name="backup_brand">
+          </div>
+          <div class="site-create-field">
+            <label for="newBackupModel">Backup Model</label>
+            <input id="newBackupModel" name="backup_model">
+          </div>
+          <div class="site-create-field">
+            <label for="newBackupPhase">Backup Phase</label>
+            <input id="newBackupPhase" name="backup_phase">
+          </div>
+          <div class="site-create-field">
+            <label for="newBackupSize">Backup Size (amp)</label>
+            <input id="newBackupSize" name="backup_size_amp" type="number" min="0" step="0.01">
+          </div>
+
+          <div class="section-divider future">Site Intelligent (Future)</div>
+
+          <div class="site-create-field">
+            <label for="intPvBrand">PV Brand</label>
+            <input id="intPvBrand">
+          </div>
+          <div class="site-create-field">
+            <label for="intPvSizeModule">PV Size Module (W)</label>
+            <input id="intPvSizeModule" type="number" min="0" step="0.01">
+          </div>
+          <div class="site-create-field">
+            <label for="intPvCapacity">PV Capacity (kWp)</label>
+            <input id="intPvCapacity" type="number" min="0" step="0.01">
+          </div>
+          <div class="site-create-field">
+            <label for="intPvQty">PV QTY Module</label>
+            <input id="intPvQty" type="number" min="0" step="1">
+          </div>
+
+          <div class="site-create-field">
+            <label for="intInverterBrand">Inverter Brand</label>
+            <input id="intInverterBrand">
+          </div>
+          <div class="site-create-field">
+            <label for="intInverterModel">Inverter Model</label>
+            <input id="intInverterModel">
+          </div>
+          <div class="site-create-field">
+            <label for="intInverterPhase">Inverter Phase</label>
+            <input id="intInverterPhase">
+          </div>
+          <div class="site-create-field">
+            <label for="intInverterSize">Inverter Size (kW)</label>
+            <input id="intInverterSize" type="number" min="0" step="0.01">
+          </div>
+
+          <div class="site-create-field">
+            <label for="intBatteryBrand">Battery Brand</label>
+            <input id="intBatteryBrand">
+          </div>
+          <div class="site-create-field">
+            <label for="intBatteryModel">Battery Model</label>
+            <input id="intBatteryModel">
+          </div>
+          <div class="site-create-field">
+            <label for="intBatteryPhase">Battery Phase</label>
+            <input id="intBatteryPhase">
+          </div>
+          <div class="site-create-field">
+            <label for="intBatterySize">Battery Size (kWh)</label>
+            <input id="intBatterySize" type="number" min="0" step="0.01">
+          </div>
+
+          <div class="site-create-field">
+            <label for="intBackupBrand">Backup Brand</label>
+            <input id="intBackupBrand">
+          </div>
+          <div class="site-create-field">
+            <label for="intBackupModel">Backup Model</label>
+            <input id="intBackupModel">
+          </div>
+          <div class="site-create-field">
+            <label for="intBackupPhase">Backup Phase</label>
+            <input id="intBackupPhase">
+          </div>
+          <div class="site-create-field">
+            <label for="intBackupSize">Backup Size (amp)</label>
+            <input id="intBackupSize" type="number" min="0" step="0.01">
+          </div>
+
+        </div>
+      </div>
+
+      <div class="site-create-error" id="siteCreateError"></div>
+
+      <div class="site-modal-actions">
+        <button type="button" id="cancelSiteCreateButton">ยกเลิก</button>
+        <button class="primary" id="saveSiteCreateButton" type="submit">บันทึก Site</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 const $ = id => document.getElementById(id);
 let rawRows = [], columns = [];
@@ -280,62 +576,294 @@ function showLoading(){ $("emptyState").style.display="none"; $("loadingState").
 function showDashboard(){ $("emptyState").style.display="none"; $("loadingState").style.display="none"; $("dashboardContent").classList.add("visible"); $("headerActions").style.display="flex"; $("initialSubtitle").style.display="none"; $("resultSubtitle").style.display="block"; }
 const API_URL = "https://solar-analyzer-api.onrender.com";
 let selectedSite = null;
+let siteMap = new Map();
 
-async function loadSitesFromDatabase(){
-  const select = $("siteSelect");
+async function loadSitesFromDatabase(preselectCode = ""){
+  const datalist = $("siteOptions");
   try{
     const response = await fetch(`${API_URL}/api/sites`);
     const data = await response.json();
     if(!response.ok) throw new Error(data.detail || "ไม่สามารถโหลด Site ได้");
 
     const sites = Array.isArray(data) ? data : (data.sites || []);
-    select.innerHTML = '<option value="">เลือก Site...</option>';
+    siteMap = new Map(sites.map(site => [String(site.site_code).toUpperCase(), site]));
+    datalist.innerHTML = "";
 
     sites.forEach(site => {
       const option = document.createElement("option");
       option.value = site.site_code;
-      option.textContent = `${site.site_code}${site.customer_name ? ` - ${site.customer_name}` : ""}`;
-      option.dataset.site = JSON.stringify(site);
-      select.appendChild(option);
+      option.label = `${site.site_code}${site.site_name ? ` - ${site.site_name}` : site.customer_name ? ` - ${site.customer_name}` : ""}`;
+      datalist.appendChild(option);
     });
 
-    if(!sites.length){
-      select.innerHTML = '<option value="">ยังไม่มี Site ในระบบ</option>';
+    if(preselectCode){
+      $("siteInput").value = preselectCode;
+      syncSelectedSiteFromInput();
     }
   }catch(error){
     console.error(error);
-    select.innerHTML = '<option value="">โหลด Site ไม่สำเร็จ</option>';
+    siteMap = new Map();
   }
 }
 
-$("siteSelect").addEventListener("change", event => {
-  const option = event.target.options[event.target.selectedIndex];
-  if(!event.target.value){
+function syncSelectedSiteFromInput(){
+  const code = $("siteInput").value.trim();
+  const match = siteMap.get(code.toUpperCase()) || null;
+  selectedSite = match;
+
+  if(match){
+    $("installedSize").value = match.installed_size_kwp ?? "";
+    $("panelCountInput").value = match.panel_current ?? "";
+  }
+}
+
+$("siteInput").addEventListener("change", syncSelectedSiteFromInput);
+$("siteInput").addEventListener("input", () => {
+  const code = $("siteInput").value.trim();
+  const match = siteMap.get(code.toUpperCase()) || null;
+  if(match){
+    selectedSite = match;
+    $("installedSize").value = match.installed_size_kwp ?? "";
+    $("panelCountInput").value = match.panel_current ?? "";
+  }else{
     selectedSite = null;
-    $("installedSize").value = "";
-    $("panelCountInput").value = "";
+  }
+});
+
+function openSiteCreateModal(){
+  $("siteCreateError").classList.remove("visible");
+  $("siteCreateError").textContent = "";
+  $("siteCreateForm").reset();
+  $("newBattery").value = "false";
+  $("newTou").value = "false";
+  $("newStatus").value = "Active";
+  $("siteCreateModal").classList.add("open");
+  setTimeout(() => $("newSiteCode").focus(), 0);
+}
+
+function closeSiteCreateModal(){
+  $("siteCreateModal").classList.remove("open");
+}
+
+function optionalText(id){
+  const value = $(id).value.trim();
+  return value || undefined;
+}
+
+function optionalNumber(id){
+  const value = $(id).value.trim();
+  if(value === "") return undefined;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : undefined;
+}
+
+$("addSiteInlineButton").addEventListener("click", openSiteCreateModal);
+$("closeSiteCreateModal").addEventListener("click", closeSiteCreateModal);
+$("cancelSiteCreateButton").addEventListener("click", closeSiteCreateModal);
+$("siteCreateModal").addEventListener("click", event => {
+  if(event.target === $("siteCreateModal")) closeSiteCreateModal();
+});
+
+document.addEventListener("keydown", event => {
+  if(event.key === "Escape" && $("siteCreateModal").classList.contains("open")){
+    closeSiteCreateModal();
+  }
+});
+
+$("siteCreateForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const saveButton = $("saveSiteCreateButton");
+  const errorBox = $("siteCreateError");
+  errorBox.classList.remove("visible");
+  errorBox.textContent = "";
+
+  const siteCode = $("newSiteCode").value.trim();
+  const installedSize = Number($("newInstalledSize").value);
+  const panelCurrent = Number($("newPanelCurrent").value);
+
+  if(!siteCode){
+    errorBox.textContent = "กรุณากรอก Site Code";
+    errorBox.classList.add("visible");
+    return;
+  }
+  if(!Number.isFinite(installedSize) || installedSize < 0){
+    errorBox.textContent = "กรุณากรอก PV Capacity / Installed Size ให้ถูกต้อง";
+    errorBox.classList.add("visible");
+    return;
+  }
+  if(!Number.isFinite(panelCurrent) || panelCurrent < 0){
+    errorBox.textContent = "กรุณากรอก PV QTY Module ให้ถูกต้อง";
+    errorBox.classList.add("visible");
     return;
   }
 
-  selectedSite = JSON.parse(option.dataset.site);
-  $("installedSize").value = selectedSite.installed_size_kwp ?? "";
-  $("panelCountInput").value = selectedSite.panel_current ?? "";
+  const payload = {
+    site_code: siteCode,
+    installed_size_kwp: installedSize,
+    panel_current: panelCurrent,
+    battery: $("newBattery").value === "true",
+    tou: $("newTou").value === "true",
+    status: $("newStatus").value || "Active"
+  };
+
+  const textFields = {
+    site_name:"newSiteName",
+    customer_name:"newCustomerName",
+    tel:"newTel",
+    email:"newEmail",
+    address:"newAddress",
+    date_of_birth:"newDateOfBirth",
+    install_date:"newInstallDate",
+    pv_brand:"newPvBrand",
+    inverter_brand:"newInverterBrand",
+    inverter_model:"newInverterModel",
+    inverter_phase:"newInverterPhase",
+    battery_brand:"newBatteryBrand",
+    battery_model:"newBatteryModel",
+    battery_phase:"newBatteryPhase",
+    backup_brand:"newBackupBrand",
+    backup_model:"newBackupModel",
+    backup_phase:"newBackupPhase",
+    intelligent_pv_brand:"intPvBrand",
+    intelligent_inverter_brand:"intInverterBrand",
+    intelligent_inverter_model:"intInverterModel",
+    intelligent_inverter_phase:"intInverterPhase",
+    intelligent_battery_brand:"intBatteryBrand",
+    intelligent_battery_model:"intBatteryModel",
+    intelligent_battery_phase:"intBatteryPhase",
+    intelligent_backup_brand:"intBackupBrand",
+    intelligent_backup_model:"intBackupModel",
+    intelligent_backup_phase:"intBackupPhase"
+  };
+
+  Object.entries(textFields).forEach(([field,id]) => {
+    const value = $(id).value.trim();
+    if(value) payload[field] = value;
+  });
+
+  const numberFields = {
+    pv_size_module_w:"newPvSizeModule",
+    panel_max:"newPanelMax",
+    inverter_size_kw:"newInverterSize",
+    battery_size_kwh:"newBatterySize",
+    backup_size_amp:"newBackupSize",
+    intelligent_pv_size_module_w:"intPvSizeModule",
+    intelligent_pv_capacity_kwp:"intPvCapacity",
+    intelligent_pv_qty_module:"intPvQty",
+    intelligent_inverter_size_kw:"intInverterSize",
+    intelligent_battery_size_kwh:"intBatterySize",
+    intelligent_backup_size_amp:"intBackupSize"
+  };
+
+  Object.entries(numberFields).forEach(([field,id]) => {
+    const raw = $(id).value.trim();
+    if(raw !== ""){
+      const value = Number(raw);
+      if(Number.isFinite(value)) payload[field] = value;
+    }
+  });
+
+  saveButton.disabled = true;
+  saveButton.textContent = "กำลังบันทึก...";
+
+  try{
+    const response = await fetch(`${API_URL}/api/sites`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json();
+
+    if(!response.ok){
+      const detail = typeof result.detail === "string"
+        ? result.detail
+        : JSON.stringify(result.detail || result);
+      throw new Error(detail || "ไม่สามารถสร้าง Site ได้");
+    }
+
+    closeSiteCreateModal();
+    await loadSitesFromDatabase(siteCode);
+    $("installedSize").value = installedSize;
+    $("panelCountInput").value = panelCurrent;
+    alert(`เพิ่ม Site ${siteCode} เรียบร้อยแล้ว`);
+  }catch(error){
+    errorBox.textContent = error.message || "ไม่สามารถสร้าง Site ได้";
+    errorBox.classList.add("visible");
+  }finally{
+    saveButton.disabled = false;
+    saveButton.textContent = "บันทึก Site";
+  }
 });
 
 function getSiteMetadata(){
-  if(!selectedSite) throw new Error("กรุณาเลือก Site ก่อนวิเคราะห์");
+  const siteCode = $("siteInput").value.trim();
+  const installedSize = Number($("installedSize").value);
+  const panelCount = Number($("panelCountInput").value);
 
-  const installedSize = Number(selectedSite.installed_size_kwp);
-  const panelCount = Number(selectedSite.panel_current);
-  if(!Number.isFinite(installedSize)||installedSize<=0) throw new Error("Site นี้ยังไม่มีข้อมูลขนาดติดตั้ง (kWp)");
-  if(!Number.isFinite(panelCount)||panelCount<0) throw new Error("Site นี้ยังไม่มีข้อมูลจำนวนแผง");
+  if(!siteCode) throw new Error("กรุณาพิมพ์หรือเลือก Site");
+  if(!Number.isFinite(installedSize) || installedSize <= 0) throw new Error("กรุณากรอกขนาดติดตั้ง (kWp)");
+  if(!Number.isFinite(panelCount) || panelCount < 0) throw new Error("กรุณากรอกจำนวนแผง");
+
+  const existing = siteMap.get(siteCode.toUpperCase()) || null;
 
   return {
-    siteCode: selectedSite.site_code,
-    siteName: selectedSite.customer_name || selectedSite.site_code,
+    siteCode,
+    siteName: existing?.site_name || existing?.customer_name || siteCode,
     installedSize,
-    panelCount
+    panelCount,
+    existing
   };
+}
+
+async function ensureSiteReady(metadata){
+  if(metadata.existing){
+    const currentSize = Number(metadata.existing.installed_size_kwp ?? 0);
+    const currentPanels = Number(metadata.existing.panel_current ?? 0);
+    if(currentSize !== metadata.installedSize || currentPanels !== metadata.panelCount){
+      const response = await fetch(`${API_URL}/api/sites/${encodeURIComponent(metadata.siteCode)}`, {
+        method:"PUT",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          installed_size_kwp:metadata.installedSize,
+          panel_current:metadata.panelCount
+        })
+      });
+      const result = await response.json();
+      if(!response.ok) throw new Error(result.detail || "ไม่สามารถอัปเดตข้อมูล Site ได้");
+      metadata.existing = result.site;
+      selectedSite = result.site;
+      siteMap.set(metadata.siteCode.toUpperCase(), result.site);
+    }
+    return;
+  }
+
+  const payload = {
+    site_code: metadata.siteCode,
+    site_name: metadata.siteCode,
+    customer_name: metadata.siteCode,
+    installed_size_kwp: metadata.installedSize,
+    panel_current: metadata.panelCount,
+    battery: false,
+    tou: false,
+    status: "Active"
+  };
+
+  const response = await fetch(`${API_URL}/api/sites`, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(payload)
+  });
+  const result = await response.json();
+
+  if(!response.ok){
+    if(response.status !== 409){
+      throw new Error(result.detail || "ไม่สามารถสร้าง Site ใหม่ได้");
+    }
+  }
+
+  await loadSitesFromDatabase(metadata.siteCode);
+  metadata.existing = siteMap.get(metadata.siteCode.toUpperCase()) || null;
 }
 
 async function handleFile(file){
@@ -345,6 +873,7 @@ async function handleFile(file){
 
   try{
     const metadata=getSiteMetadata();
+    await ensureSiteReady(metadata);
     const formData = new FormData();
     formData.append("file", file);
     formData.append("site_code", metadata.siteCode);
@@ -379,6 +908,7 @@ async function handleFile(file){
 }
 
 $("fileInput").addEventListener("change",e=>handleFile(e.target.files[0]));
+$("exportDashboardPdf").addEventListener("click",()=>window.print());
 
 function detectColumns(cols){
   const find = keywords => cols.find(col => {
