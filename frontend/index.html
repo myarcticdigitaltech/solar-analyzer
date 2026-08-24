@@ -247,6 +247,173 @@ h1{max-width:760px;font-size:38px}
 }
 .unit-note{font-size:12px;color:var(--muted);margin-top:5px}
 
+
+/* Dashboard-style PDF template */
+@page{
+  size:A4 landscape;
+  margin:10mm;
+}
+@media print{
+  html,body{
+    width:100%;
+    background:#f4f7fb!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+  body{
+    margin:0!important;
+    font-size:11px!important;
+  }
+
+  .sidebar,
+  .empty-state,
+  .loading-state,
+  .actions,
+  .file-label,
+  .print-button,
+  .site-modal,
+  #dropZone,
+  .site-form,
+  #initialSubtitle{
+    display:none!important;
+  }
+
+  .app{
+    display:block!important;
+    min-height:auto!important;
+  }
+
+  main{
+    width:100%!important;
+    max-width:none!important;
+    padding:0!important;
+    margin:0!important;
+  }
+
+  .dashboard-content{
+    display:block!important;
+  }
+
+  .header{
+    margin-bottom:10px!important;
+  }
+
+  h1{
+    font-size:25px!important;
+    margin-bottom:4px!important;
+  }
+
+  .subtitle{
+    font-size:12px!important;
+  }
+
+  .site-badge-row{
+    display:flex!important;
+    flex-wrap:wrap!important;
+    gap:6px!important;
+    margin:6px 0!important;
+  }
+
+  .site-badge,
+  .meta-pill{
+    font-size:9px!important;
+    padding:5px 8px!important;
+  }
+
+  .notice{
+    font-size:9px!important;
+    padding:7px 10px!important;
+    margin:8px 0 10px!important;
+  }
+
+  .grid.summary{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:10px!important;
+  }
+
+  .grid.times{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+
+  .grid.recommend,
+  .grid.bottom{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:10px!important;
+  }
+
+  .card,
+  .time-card{
+    box-shadow:none!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+  }
+
+  .card.metric{
+    min-height:105px!important;
+    padding:14px!important;
+  }
+
+  .metric-value{
+    font-size:25px!important;
+  }
+
+  .section-title{
+    font-size:18px!important;
+    margin:14px 0 8px!important;
+    break-after:avoid!important;
+  }
+
+  .time-card{
+    min-height:70px!important;
+    padding:10px!important;
+  }
+
+  .table-wrap{
+    overflow:visible!important;
+  }
+
+  table{
+    width:100%!important;
+    min-width:0!important;
+    table-layout:fixed!important;
+    font-size:8px!important;
+  }
+
+  th,td{
+    padding:5px 4px!important;
+    word-break:break-word!important;
+  }
+
+  thead{
+    display:table-header-group!important;
+  }
+
+  tr{
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+  }
+
+  .panel,
+  .rec{
+    min-height:auto!important;
+    padding:12px!important;
+  }
+
+  a[href]:after{
+    content:""!important;
+  }
+
+  /* keep visual hierarchy close to the live dashboard */
+  .card,
+  .time-card,
+  .notice,
+  th{
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+}
+
 </style>
 </head>
 <body>
