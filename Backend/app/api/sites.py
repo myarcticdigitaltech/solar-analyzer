@@ -360,6 +360,10 @@ def _execute(
 
     except Exception as exc:
 
+        # Log the real Supabase error in Render Logs so insert/update
+        # failures can be diagnosed without guessing.
+        print("SUPABASE ERROR:", repr(exc), flush=True)
+
         error_code = str(
             getattr(exc, "code", "")
         )
@@ -379,12 +383,12 @@ def _execute(
                 ),
             ) from exc
 
+        # Temporarily return the Supabase error message while debugging.
+        # Once the schema issue is fixed, change this back to a generic
+        # production-safe message.
         raise HTTPException(
             status_code=502,
-            detail=(
-                "Unable to access site data "
-                "in Supabase."
-            ),
+            detail=f"Supabase error: {str(exc)}",
         ) from exc
 
     return response.data or []
