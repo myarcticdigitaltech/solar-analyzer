@@ -533,9 +533,9 @@ h1{max-width:760px;font-size:38px}
 
   <div class="section-title" id="recommendation">4. คำแนะนำที่ควรทำ</div>
   <section class="grid recommend">
-    <div class="card rec"><div class="icon">🧺</div><h3>1) ย้ายโหลดหนักมาใช้กลางวัน</h3><p id="recLoad"></p></div>
-    <div class="card rec"><div class="icon">🔋</div><h3>2) พิจารณาเพิ่ม Battery</h3><p id="recBattery"></p></div>
-    <div class="card rec"><div class="icon">🔎</div><h3>3) ตรวจสอบการใช้ไฟกลางคืน</h3><p id="recNight"></p></div>
+    <div class="card rec"><div class="icon">🧺</div><h3 id="recLoadTitle">1) วิเคราะห์โหลดกลางวัน</h3><p id="recLoad"></p></div>
+    <div class="card rec"><div class="icon">🔋</div><h3 id="recBatteryTitle">2) วิเคราะห์ Battery</h3><p id="recBattery"></p></div>
+    <div class="card rec"><div class="icon">🔎</div><h3 id="recNightTitle">3) วิเคราะห์โหลดกลางคืน</h3><p id="recNight"></p></div>
   </section>
 
   <section class="grid bottom" style="grid-template-columns:1fr">
@@ -1334,49 +1334,68 @@ function renderBackendResult(result, filename, submittedMetadata){
     `<li>Solar Coverage ${Number(summary.daytime_coverage_percent || 0).toFixed(1)}%</li>`;
 
   const coverage = Number(summary.daytime_coverage_percent || 0);
+  const insights = result.insights || {};
+
   $("dayHighlight").textContent =
-    coverage >= 90 ? "✓ Solar ครอบคลุมโหลดกลางวันได้ดีมาก" :
-    coverage >= 70 ? "Solar ครอบคลุมโหลดกลางวันได้ดี" :
-    coverage >= 40 ? "Solar ช่วยลดการพึ่งพา Battery/Grid ได้บางส่วน" :
-    "Solar ยังครอบคลุมโหลดกลางวันค่อนข้างน้อย";
+    insights.day ||
+    (coverage >= 90
+      ? "Solar ครอบคลุมโหลดกลางวันได้ดี"
+      : "Solar ยังมีช่องว่างในการครอบคลุมโหลดกลางวัน");
 
   $("analysisEvening").innerHTML =
     `<li>Solar ผลิตเฉลี่ย ${f(evening.solar_kwh)} kWh/วัน</li>` +
     `<li>โหลดที่ระบบจ่ายเฉลี่ย ${f(evening.usage_kwh)} kWh/วัน</li>` +
+    `<li>Solar จ่ายโหลดโดยตรง ${f(evening.solar_used_kwh)} kWh/วัน</li>` +
     `<li>Battery Discharge เฉลี่ย ${f(evening.battery_discharge_kwh)} kWh/วัน</li>`;
 
   $("eveningHighlight").textContent =
-    Number(evening.usage_kwh || 0) > Number(evening.solar_kwh || 0) * 2
-      ? "ช่วงนี้พึ่งพา Battery หรือ Grid ค่อนข้างมาก"
-      : "Solar/Battery ยังช่วยช่วงเย็นได้บางส่วน";
+    insights.evening || "ยังไม่มีข้อสรุปเฉพาะช่วงเย็น";
 
   const abnormal = recommendations.abnormal_night_dates || [];
   $("analysisNight").innerHTML =
     `<li>Solar ผลิตเฉลี่ย ${f(night.solar_kwh)} kWh/วัน</li>` +
     `<li>โหลดที่ระบบจ่ายเฉลี่ย ${f(night.usage_kwh)} kWh/วัน</li>` +
-    `<li>Battery Discharge เฉลี่ย ${f(night.battery_discharge_kwh)} kWh/วัน</li>` +
-    `<li>${abnormal.length ? `พบค่าผิดปกติ ${abnormal.map(thaiDateFromISO).join(", ")}` : "ไม่พบวันที่สูงผิดปกติชัดเจน"}</li>`;
+    `<li>Solar จ่ายโหลดโดยตรง ${f(night.solar_used_kwh)} kWh/วัน</li>` +
+    `<li>Battery Discharge เฉลี่ย ${f(night.battery_discharge_kwh)} kWh/วัน</li>`;
 
   $("nightHighlight").textContent =
-    Number(night.usage_kwh || 0) > Number(day.usage_kwh || 0)
-      ? "ควรตรวจสอบโหลดกลางคืนเพิ่มเติม"
-      : "การใช้ไฟกลางคืนอยู่ในระดับที่ควบคุมได้";
+    insights.night || "ยังไม่มีข้อสรุปเฉพาะช่วงกลางคืน";
+
+  $("recLoadTitle").textContent =
+    `1) ${recommendations.load_title || "วิเคราะห์โหลดกลางวัน"}`;
+  $("recBatteryTitle").textContent =
+    `2) ${recommendations.battery_title || "วิเคราะห์ Battery"}`;
+  $("recNightTitle").textContent =
+    `3) ${recommendations.night_title || "วิเคราะห์โหลดกลางคืน"}`;
 
   $("recLoad").textContent = recommendations.load || "-";
   $("recBattery").textContent = recommendations.battery || "-";
   $("recNight").textContent = recommendations.night || "-";
 
-  const recommendedPanelCount = Number(panel.recommended_count || 0);
   $("panelResult").textContent =
-    recommendedPanelCount > 0
-      ? `แนะนำเพิ่มประมาณ ${recommendedPanelCount} แผง`
-      : "ยังไม่จำเป็นต้องเพิ่มแผง";
+    panel.title ||
+    (Number(panel.recommended_count || 0) > 0
+      ? `พิจารณาเพิ่มประมาณ ${Number(panel.recommended_count)} แผง`
+      : "ยังไม่มีข้อสรุปให้เพิ่มแผง");
 
-  $("panelDesc").textContent =
-    `ประเมินจากโหลดกลางวันที่ Solar ยังครอบคลุมไม่ได้เฉลี่ย ` +
-    `${f(panel.uncovered_daytime_kwh)} kWh/วัน โดยสมมติแผง 625 W ` +
-    `ผลิตประมาณ ${f(panel.assumed_panel_daily_yield_kwh || 2.5)} kWh/วัน ` +
-    `ควรตรวจสอบพื้นที่หลังคา String และขนาด Inverter ก่อนติดตั้งจริง`;
+  const panelStatus = panel.status || "";
+  if(panelStatus === "consider"){
+    $("panelDesc").textContent =
+      `มีโหลดกลางวันที่ Solar ยังไม่ครอบคลุมเฉลี่ย ${f(panel.uncovered_daytime_kwh)} kWh/วัน ` +
+      `คำนวณเบื้องต้นด้วยผลผลิตต่อแผงประมาณ ${f(panel.assumed_panel_daily_yield_kwh || 2.5)} kWh/วัน ` +
+      `จำนวนจริงต้องตรวจพื้นที่หลังคา String, MPPT, DC/AC ratio และขนาด Inverter ก่อน`;
+  }else if(panelStatus === "monitor"){
+    $("panelDesc").textContent =
+      `ช่องว่างโหลดกลางวันประมาณ ${f(panel.uncovered_daytime_kwh)} kWh/วัน ยังเล็กเมื่อเทียบกับสมมติฐาน ` +
+      `${f(panel.assumed_panel_daily_yield_kwh || 2.5)} kWh/วันต่อแผง จึงควรเก็บข้อมูลเพิ่มก่อนขยายระบบ`;
+  }else if(panelStatus === "insufficient_data"){
+    $("panelDesc").textContent =
+      "ข้อมูลโหลดช่วงกลางวันไม่เพียงพอสำหรับคำนวณจำนวนแผงอย่างมีเหตุผล";
+  }else{
+    $("panelDesc").textContent =
+      `จากโหลดช่วงกลางวันที่วัดได้ Solar ยังไม่ครอบคลุมประมาณ ${f(panel.uncovered_daytime_kwh)} kWh/วัน ` +
+      `จึงยังไม่มีเหตุผลจากโหลดชุดนี้ให้เพิ่มจำนวนแผง ทั้งนี้ควรตรวจข้อจำกัด Inverter และพื้นที่ติดตั้งแยกต่างหาก`;
+  }
 
 }
 
