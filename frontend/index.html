@@ -1293,15 +1293,25 @@ function renderBackendResult(result, filename, submittedMetadata){
   const installedSize=siteInfo.installed_size_kwp??siteInfo.installedSize??0;
   const installedPanelCount=siteInfo.panel_count??siteInfo.panelCount??0;
 
-  // Battery badge: trust Site Master Data from Supabase first.
-  // CSV detection is only a fallback when the Site record has no battery value.
+  // Battery badge: combine Site Master Data with actual CSV evidence.
+  // Clear charge/discharge activity in CSV overrides an outdated battery=false.
   const siteMaster =
     submittedMetadata?.existing ||
     selectedSite ||
     null;
 
+  const batteryStatus = siteInfo.battery_status ?? "unknown";
+  const csvDetectedBattery = batteryStatus === "with_battery";
+
   let batteryText;
-  if(siteMaster && siteMaster.battery === true){
+
+  if(csvDetectedBattery){
+    const batterySize = Number(siteMaster?.battery_size_kwh);
+    batteryText =
+      Number.isFinite(batterySize) && batterySize > 0
+        ? `มี Battery ${batterySize.toFixed(2)} kWh`
+        : "มี Battery (ตรวจพบจาก CSV)";
+  }else if(siteMaster && siteMaster.battery === true){
     const batterySize = Number(siteMaster.battery_size_kwh);
     batteryText =
       Number.isFinite(batterySize) && batterySize > 0
@@ -1310,11 +1320,8 @@ function renderBackendResult(result, filename, submittedMetadata){
   }else if(siteMaster && siteMaster.battery === false){
     batteryText = "ไม่มี Battery";
   }else{
-    const batteryStatus=siteInfo.battery_status??"unknown";
     batteryText =
-      batteryStatus === "with_battery"
-        ? "ตรวจพบ Battery จาก CSV"
-        : batteryStatus === "without_battery"
+      batteryStatus === "without_battery"
         ? "ไม่พบการทำงานของ Battery ใน CSV"
         : "ไม่สามารถระบุได้";
   }
