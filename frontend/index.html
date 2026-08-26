@@ -1291,15 +1291,36 @@ function renderBackendResult(result, filename, submittedMetadata){
   $("siteLabel").textContent=siteInfo.site_name||siteInfo.siteName||"UPLOADED SITE";
   $("dateRange").textContent=`ข้อมูล ${thaiDateFromISO(result.site?.date_from)} – ${thaiDateFromISO(result.site?.date_to)}`;
   const installedSize=siteInfo.installed_size_kwp??siteInfo.installedSize??0;
-  const batteryStatus=siteInfo.battery_status??"unknown";
   const installedPanelCount=siteInfo.panel_count??siteInfo.panelCount??0;
+
+  // Battery badge: trust Site Master Data from Supabase first.
+  // CSV detection is only a fallback when the Site record has no battery value.
+  const siteMaster =
+    submittedMetadata?.existing ||
+    selectedSite ||
+    null;
+
+  let batteryText;
+  if(siteMaster && siteMaster.battery === true){
+    const batterySize = Number(siteMaster.battery_size_kwh);
+    batteryText =
+      Number.isFinite(batterySize) && batterySize > 0
+        ? `มี Battery ${batterySize.toFixed(2)} kWh`
+        : "มี Battery";
+  }else if(siteMaster && siteMaster.battery === false){
+    batteryText = "ไม่มี Battery";
+  }else{
+    const batteryStatus=siteInfo.battery_status??"unknown";
+    batteryText =
+      batteryStatus === "with_battery"
+        ? "ตรวจพบ Battery จาก CSV"
+        : batteryStatus === "without_battery"
+        ? "ไม่พบการทำงานของ Battery ใน CSV"
+        : "ไม่สามารถระบุได้";
+  }
+
   $("sizeBadge").textContent=`ขนาดติดตั้ง: ${Number(installedSize).toFixed(2)} kWp`;
-  $("batteryBadge").textContent =
-    batteryStatus === "with_battery"
-      ? "Battery: ตรวจพบจาก CSV"
-      : batteryStatus === "without_battery"
-      ? "Battery: ไม่พบการชาร์จ/คายประจุ"
-      : "Battery: ไม่สามารถระบุได้";
+  $("batteryBadge").textContent=`Battery: ${batteryText}`;
   $("panelBadge").textContent=`จำนวนแผง: ${Number(installedPanelCount)} แผง`;
   $("siteMeta").style.display="flex";
 
