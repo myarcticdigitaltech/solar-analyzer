@@ -2,16 +2,9 @@ import pandas as pd
 from fastapi import HTTPException
 
 
-def numeric_series(
-    series: pd.Series | None,
-    index: pd.Index,
-) -> pd.Series:
+def numeric_series(series: pd.Series | None, index: pd.Index) -> pd.Series:
     if series is None:
-        return pd.Series(
-            0.0,
-            index=index,
-            dtype="float64",
-        )
+        return pd.Series(0.0, index=index, dtype="float64")
 
     cleaned = (
         series.astype(str)
@@ -19,20 +12,16 @@ def numeric_series(
         .str.strip()
     )
 
-    return pd.to_numeric(
-        cleaned,
-        errors="coerce",
-    ).fillna(0.0)
+    return pd.to_numeric(cleaned, errors="coerce").fillna(0.0)
 
 
 def normalize_dataframe(
     dataframe: pd.DataFrame,
     detected: dict[str, str | None],
 ) -> pd.DataFrame:
-    normalized = pd.DataFrame(
-        index=dataframe.index,
-    )
+    normalized = pd.DataFrame(index=dataframe.index)
 
+    # Keep timestamps timezone-naive and use the date/time as written in the file.
     normalized["datetime"] = pd.to_datetime(
         dataframe[detected["time"]],
         errors="coerce",
@@ -45,33 +34,34 @@ def normalize_dataframe(
         dataframe.index,
     ).clip(lower=0)
 
-    normalized["active_power_kw"] = numeric_series(
+    # Keep the original sign for diagnostics.
+    active_power_raw = numeric_series(
         dataframe[detected["active_power"]],
         dataframe.index,
-    ).abs()
+    )
+    normalized["active_power_raw_kw"] = active_power_raw
+
+    # Negative active power must not be converted into positive consumption.
+    # If negative means export/reverse flow, it contributes 0 kW to usage.
+    normalized["active_power_kw"] = active_power_raw.clip(lower=0)
 
     charge_column = detected.get("battery_charge")
     discharge_column = detected.get("battery_discharge")
 
     normalized["battery_charge_kw"] = numeric_series(
-        dataframe[charge_column]
-        if charge_column else None,
+        dataframe[charge_column] if charge_column else None,
         dataframe.index,
     ).clip(lower=0)
 
     normalized["battery_discharge_kw"] = numeric_series(
-        dataframe[discharge_column]
-        if discharge_column else None,
+        dataframe[discharge_column] if discharge_column else None,
         dataframe.index,
     ).clip(lower=0)
 
     normalized = (
         normalized
         .dropna(subset=["datetime"])
-        .drop_duplicates(
-            subset=["datetime"],
-            keep="last",
-        )
+        .drop_duplicates(subset=["datetime"], keep="last")
         .sort_values("datetime")
         .reset_index(drop=True)
     )
